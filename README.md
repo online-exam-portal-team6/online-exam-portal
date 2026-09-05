@@ -38,4 +38,4 @@ result generation.
 | Bhumika Praveen Patil | PES1UG24AM352 | Backend Developer | Django backend, project coordination, GitHub management |
 | Akash Shivanand Bagoji | PES1UG24AM339 | Frontend Developer + UI/UX | HTML, CSS, JavaScript, user interface |
 | [Member 3 Name] | [USN] | Database Developer | Database design, Django models, data management |
-| [Member 4 Name] | [USN] | QA/Testing + Documentation | Testing, test cases, bug tracking, documentation |
+| VIJAY SURIYA P| PER1UG24AM320 | QA/Testing + Documentation | Testing, test cases, bug tracking, documentation |
