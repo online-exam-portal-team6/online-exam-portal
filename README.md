@@ -31,6 +31,10 @@ result generation.
 - Software Architecture and Design Specification (SAD)
 - Software Test Plan (STP)
 
-## Team
+## Team Members and Roles
 
-Team members will be added to the organization and repository.
+| Name | USN | Role | Responsibilities |
+|---|---|---|---|
+| Bhumika Praveen Patil | PES1UG24AM352 | Team Lead + Backend Developer | Django backend, project coordination, GitHub management |
+| Akash Shivanand Bagoji | PES1UG24AM339 | Frontend Developer + UI/UX | HTML, CSS, JavaScript, user interface |
+| [Third Member Name] | PES1UG24AM320 | QA/Testing + Database & Documentation | Testing, database, documentation |
