@@ -4,6 +4,8 @@ from django.contrib.auth.views import LoginView
 from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import redirect, render
 from django.template import TemplateDoesNotExist
+from django.contrib.auth import logout
+from django.views.decorators.http import require_POST
 
 
 def root_redirect(request):
@@ -98,5 +100,7 @@ def register_view(request):
 
 
 # TODO (Bhumika): POST-only logout, then redirect to accounts:login
+@require_POST
 def logout_view(request):
-    return HttpResponse("TODO (Bhumika): logout")
+    logout(request)
+    return redirect("accounts:login")
