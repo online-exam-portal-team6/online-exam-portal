@@ -1,0 +1,49 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Register - Online Exam Portal</title>
+</head>
+<body>
+    <h1>Online Exam Portal</h1>
+    <h2>Create an account</h2>
+
+    {% if errors %}
+        <ul>
+            {% for error in errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+
+        <p>
+            <label for="username">Username:</label>
+            <input id="username" name="username" value="{{ username|default:'' }}" required>
+        </p>
+
+        <p>
+            <label for="email">Email:</label>
+            <input id="email" type="email" name="email" value="{{ email|default:'' }}">
+        </p>
+
+        <p>
+            <label for="password">Password:</label>
+            <input id="password" type="password" name="password" required>
+        </p>
+
+        <p>
+            <label for="confirm_password">Confirm password:</label>
+            <input id="confirm_password" type="password" name="confirm_password" required>
+        </p>
+
+        <button type="submit">Register</button>
+    </form>
+
+    <p><a href="{% url 'accounts:login' %}">Already have an account? Log in</a></p>
+</body>
+</html>
