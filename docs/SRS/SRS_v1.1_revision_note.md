@@ -5,7 +5,7 @@
 | Project | Online Exam Portal |
 | Revises | SRS v1.0 (06-09-2026, author Bhumika Praveen Patil) |
 | Prepared by | Vijay Suriya P (Product Owner / Business Analyst) |
-| Date | 26-10-2026 |
+| Date | 25-10-2026 |
 
 ## 1. Purpose
 
