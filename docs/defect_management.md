@@ -45,7 +45,7 @@ written in a Jira comment (for example "cosmetic, deferred to Sprint 2"). High b
 | Evidence | Screenshot, log or traceback attached to the issue |
 | Found by / date | Name and date |
 
-Never put passwords, secret keys or real student data in a bug report.
+Never put passwords, secret keys or api keys or real student data in a bug report.
 
 ## 4. Severity rules
 
