@@ -1,7 +1,11 @@
 """Exam management views. Owner: Thejas. Replace the stub bodies, keep the decorators and names."""
+from django.contrib import messages
 from django.http import HttpResponse
+from django.shortcuts import redirect, render
 
 from accounts.decorators import admin_required, student_required
+
+from .forms import ExamForm
 
 
 @student_required
@@ -24,8 +28,18 @@ def exam_list(request):
 
 @admin_required
 def exam_create(request):
-    # TODO (Thejas, OEP-F-007): context form, exam=None
-    return HttpResponse("TODO (Thejas): exam create")
+    """OEP-F-007: an administrator creates an examination."""
+    if request.method == "POST":
+        form = ExamForm(request.POST)
+        if form.is_valid():
+            exam = form.save(commit=False)
+            exam.created_by = request.user
+            exam.save()
+            messages.success(request, f'Examination "{exam.title}" was created.')
+            return redirect("exams:exam_list")
+    else:
+        form = ExamForm()
+    return render(request, "exams/exam_form.html", {"form": form, "exam": None})
 
 
 @admin_required
