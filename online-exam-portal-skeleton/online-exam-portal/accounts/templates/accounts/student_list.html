@@ -1,0 +1,120 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management | Online Exam Portal</title>
+    <link rel="stylesheet" href="{% static 'css/student_list.css' %}">
+</head>
+<body>
+    <div class="dashboard">
+        <aside class="sidebar">
+            <div class="brand">OEP<span>.</span></div>
+            <p class="sidebar-label">ADMINISTRATION</p>
+            <a class="nav-link active" href="{% url 'accounts:student_list' %}">
+                <span>▦</span> Student Management
+            </a>
+            <div class="sidebar-footer">Online Exam Portal</div>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <div>
+                    <p class="eyebrow">ADMIN / STUDENTS</p>
+                    <h1>Student Management</h1>
+                    <p class="subtitle">View and manage student account statuses.</p>
+                </div>
+                <div class="admin-label"><span></span> Administrator</div>
+            </header>
+
+            <section class="summary-card">
+                <div>
+                    <p class="card-label">REGISTERED STUDENTS</p>
+                    <h2>{{ students|length }}</h2>
+                    <p class="card-note">Students in the current list</p>
+                </div>
+                <div class="summary-icon">♙</div>
+            </section>
+
+            <section class="table-card">
+                <div class="table-heading">
+                    <div>
+                        <h2>All Students</h2>
+                        <p>Review student details and account status.</p>
+                    </div>
+                    <span class="count-badge">{{ students|length }} students</span>
+                </div>
+
+                <div class="table-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>STUDENT</th>
+                                <th>ROLL NUMBER</th>
+                                <th>STATUS</th>
+                                <th>ACTION</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for student in students %}
+                            <tr>
+                                <td>
+                                    <div class="student-cell">
+                                        <div class="avatar">
+                                            {{ student.user.username|first|upper }}
+                                        </div>
+                                        <div>
+                                            <strong>
+                                                {{ student.user.get_full_name|default:student.user.username }}
+                                            </strong>
+                                            <span>{{ student.user.username }}</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ student.roll_number|default:"—" }}</td>
+                                <td>
+                                    {% if student.user.is_active %}
+                                        <span class="status active-status">Active</span>
+                                    {% else %}
+                                        <span class="status inactive-status">Inactive</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <form method="post"
+                                          action="{% url 'accounts:student_toggle' student.user.pk %}">
+                                        {% csrf_token %}
+                                        {% if student.user.is_active %}
+                                            <button class="toggle-button deactivate"
+                                                    type="submit">Deactivate</button>
+                                        {% else %}
+                                            <button class="toggle-button activate"
+                                                    type="submit">Activate</button>
+                                        {% endif %}
+                                    </form>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="empty-state">
+                                    <div class="empty-icon">♙</div>
+                                    <strong>No students found</strong>
+                                    <p>Student accounts will appear here when available.</p>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="table-footer">Student account management</div>
+            </section>
+
+            <footer class="page-footer">
+                Online Exam Portal · Administration
+            </footer>
+        </main>
+    </div>
+</body>
+</html>
