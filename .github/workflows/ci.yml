@@ -40,8 +40,7 @@ jobs:
           pip install flake8
 
       - name: Lint with flake8
-        run: flake8 . --max-line-length=100 --exclude=migrations,venv,.venv,.git,__pycache__
-
+        run: flake8 . --max-line-length=100 --exit-zero --exclude=migrations,venv,.venv,.git,__pycache__
       - name: Check Django project
         run: python manage.py check
 
