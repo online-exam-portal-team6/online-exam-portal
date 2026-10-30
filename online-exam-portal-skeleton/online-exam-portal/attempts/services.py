@@ -11,10 +11,7 @@ from .models import Attempt
 
 
 def start_attempt(student, exam):
-    """Create the student's single attempt after validating the exam window.
-
-    Repeated requests for an already-running attempt return that same attempt.
-    """
+    """Create the student's single attempt after validating the exam window."""
     now = timezone.now()
     if not exam.is_active or now < exam.start_time or now > exam.end_time:
         raise ValidationError("This examination is not currently available.")
@@ -30,13 +27,16 @@ def start_attempt(student, exam):
             raise ValidationError("You have already completed this examination.")
 
         try:
-            return Attempt.objects.create(
-                student=student,
-                exam=locked_exam,
-                started_at=now,
-                deadline_at=now + timedelta(minutes=locked_exam.duration_minutes),
-                status=Attempt.Status.IN_PROGRESS,
-            )
+            # Inner atomic block creates a savepoint, so a uniqueness race does
+            # not leave the outer transaction marked as broken.
+            with transaction.atomic():
+                return Attempt.objects.create(
+                    student=student,
+                    exam=locked_exam,
+                    started_at=now,
+                    deadline_at=now + timedelta(minutes=locked_exam.duration_minutes),
+                    status=Attempt.Status.IN_PROGRESS,
+                )
         except IntegrityError:
             existing = Attempt.objects.filter(student=student, exam=locked_exam).first()
             if existing and existing.status == Attempt.Status.IN_PROGRESS:
