@@ -1,4 +1,5 @@
 """Exam attempt services (contract B6)."""
+
 from datetime import timedelta
 
 from django.core.exceptions import ValidationError
@@ -6,8 +7,9 @@ from django.db import IntegrityError, transaction
 from django.utils import timezone
 
 from exams.models import Exam
+from questions.models import Question
 
-from .models import Attempt
+from .models import Attempt, AttemptAnswer
 
 
 def start_attempt(student, exam):
@@ -45,9 +47,60 @@ def start_attempt(student, exam):
 
 
 def save_answer(attempt, question_id, option):
-    raise NotImplementedError("TODO (Bhumika, OEP-F-017)")
+    """Persist or replace an answer while the student's attempt is active."""
+    if option not in AttemptAnswer.Option.values:
+        raise ValidationError("Select one of the available options A, B, C or D.")
+
+    now = timezone.now()
+    with transaction.atomic():
+        locked_attempt = Attempt.objects.select_for_update().get(pk=attempt.pk)
+        if locked_attempt.status != Attempt.Status.IN_PROGRESS:
+            raise ValidationError("This examination has already been submitted.")
+        if locked_attempt.deadline_at <= now:
+            raise ValidationError("Your examination time has expired.")
+
+        question = Question.objects.filter(
+            pk=question_id,
+            exam_id=locked_attempt.exam_id,
+        ).first()
+        if question is None:
+            raise ValidationError("The selected question does not belong to this examination.")
+
+        answer, _ = AttemptAnswer.objects.update_or_create(
+            attempt=locked_attempt,
+            question=question,
+            defaults={"selected_option": option},
+        )
+        return answer
 
 
 def submit_attempt(attempt, auto=False):
-    """Idempotent. Sets SUBMITTED / AUTO_SUBMITTED, then calls results.services.evaluate_attempt(attempt)."""
-    raise NotImplementedError("TODO (Bhumika, OEP-F-018/019)")
+    """Submit once, then invoke the configured evaluation service.
+
+    Evaluation is owned by the results module. Until that service is merged,
+    the submission itself remains persisted and the evaluation call is safely
+    deferred rather than turning a valid submission into an HTTP 500.
+    """
+    now = timezone.now()
+    with transaction.atomic():
+        locked_attempt = Attempt.objects.select_for_update().get(pk=attempt.pk)
+        if locked_attempt.status != Attempt.Status.IN_PROGRESS:
+            return locked_attempt
+
+        expired = locked_attempt.deadline_at <= now
+        locked_attempt.status = (
+            Attempt.Status.AUTO_SUBMITTED if auto or expired else Attempt.Status.SUBMITTED
+        )
+        locked_attempt.submitted_at = now
+        locked_attempt.save(update_fields=["status", "submitted_at"])
+
+    from results.services import evaluate_attempt
+
+    try:
+        evaluate_attempt(locked_attempt)
+    except NotImplementedError:
+        # The evaluator is a separately owned service (OEP-F-020/021/022).
+        # Keep the student's submission recorded while that dependency lands.
+        pass
+
+    return locked_attempt
