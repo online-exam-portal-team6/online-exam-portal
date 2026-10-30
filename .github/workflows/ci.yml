@@ -1,5 +1,5 @@
 
-name: Online Exam Portal CI
+name: CI
 
 on:
   push:
@@ -15,18 +15,16 @@ jobs:
   test:
     name: Lint and test (Python ${{ matrix.python-version }})
     runs-on: ubuntu-latest
-
     defaults:
       run:
         working-directory: online-exam-portal-skeleton/online-exam-portal
-
     strategy:
       fail-fast: false
       matrix:
         python-version: ["3.11", "3.12"]
 
     steps:
-      - name: Checkout repository
+      - name: Check out the code
         uses: actions/checkout@v4
 
       - name: Set up Python
@@ -42,16 +40,31 @@ jobs:
           pip install -r requirements.txt
           pip install flake8
 
-      - name: Run Flake8
+      - name: Lint with flake8
         run: |
-          flake8 . --max-line-length=100 --extend-ignore=E501 \
-              --exclude=migrations,venv,.venv,.git,__pycache__
+          flake8 . --max-line-length=100 --extend-ignore=E501 --exclude=migrations,venv,.venv,.git,__pycache__
 
-      - name: Django system check
+      - name: Check Django project
         run: python manage.py check
 
-      - name: Check migrations
+      - name: Check for missing migrations
         run: python manage.py makemigrations --check --dry-run
 
-      - name: Run Django tests
+      - name: Run tests
         run: python manage.py test
+
+  release:
+    name: Create GitHub release
+    needs: test
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v4
+
+      - name: Create release from the tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" --generate-notes --title "$GITHUB_REF_NAME"
