@@ -1,27 +1,37 @@
-{% extends "base.html" %}
-{% block title %}{{ exam.title }} | Exam Portal{% endblock %}
-{% block content %}
-<section class="exam-start">
-    <p class="eyebrow">EXAMINATION</p>
-    <h1>{{ exam.title }}</h1>
-    <p>{{ exam.description }}</p>
-    <dl class="exam-details">
-        <div><dt>Duration</dt><dd>{{ exam.duration_minutes }} minutes</dd></div>
-        <div><dt>Available from</dt><dd>{{ exam.start_time|date:"d M Y, H:i" }}</dd></div>
-        <div><dt>Available until</dt><dd>{{ exam.end_time|date:"d M Y, H:i" }}</dd></div>
-    </dl>
-    <p>Your timer begins when you start. Only one attempt is allowed for this examination.</p>
-    {% if messages %}
-        {% for message in messages %}<p class="message {{ message.tags }}">{{ message }}</p>{% endfor %}
-    {% endif %}
-    {% if is_available %}
-        <form method="post">
-            {% csrf_token %}
-            <button type="submit" class="primary-button">Start examination</button>
-        </form>
-    {% else %}
-        <p role="status">This examination is not currently available.</p>
-        <a href="{% url 'exams:student_dashboard' %}">Return to dashboard</a>
-    {% endif %}
-</section>
-{% endblock %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ exam.title }} | Exam Portal</title>
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+</head>
+<body>
+    <main class="main-content">
+        <a href="{% url 'exams:student_dashboard' %}">← Back to dashboard</a>
+        <section class="exam-start">
+            <p class="eyebrow">EXAMINATION</p>
+            <h1>{{ exam.title }}</h1>
+            <p>{{ exam.description }}</p>
+            <dl class="exam-details">
+                <div><dt>Duration</dt><dd>{{ exam.duration_minutes }} minutes</dd></div>
+                <div><dt>Available from</dt><dd>{{ exam.start_time|date:"d M Y, H:i" }}</dd></div>
+                <div><dt>Available until</dt><dd>{{ exam.end_time|date:"d M Y, H:i" }}</dd></div>
+            </dl>
+            <p>Your timer begins when you start. Only one attempt is allowed for this examination.</p>
+            {% if messages %}
+                {% for message in messages %}<p class="message {{ message.tags }}">{{ message }}</p>{% endfor %}
+            {% endif %}
+            {% if is_available %}
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="primary-button">Start examination</button>
+                </form>
+            {% else %}
+                <p role="status">This examination is not currently available.</p>
+            {% endif %}
+        </section>
+    </main>
+</body>
+</html>
