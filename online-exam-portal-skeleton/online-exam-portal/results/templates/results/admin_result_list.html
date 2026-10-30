@@ -31,7 +31,7 @@
         </section>
         <section class="stats-grid">
             <article class="stat-card"><div class="stat-top"><span>Completed results</span><span class="stat-icon purple">▣</span></div><strong>{{ results|length }}</strong><small>Evaluated submissions</small></article>
-            <article class="stat-card"><div class="stat-top"><span>Passed</span><span class="stat-icon green">✓</span></div><strong>{{ results|length|add:"0" }}</strong><small>Results available to review</small></article>
+            <article class="stat-card"><div class="stat-top"><span>Passed</span><span class="stat-icon green">✓</span></div><strong>{{ passed_count }}</strong><small>Met the configured pass mark</small></article>
             <article class="stat-card"><div class="stat-top"><span>Access</span><span class="stat-icon blue">◎</span></div><strong class="account-status">Admin</strong><small>All students and examinations</small></article>
         </section>
         <section class="section-block">
