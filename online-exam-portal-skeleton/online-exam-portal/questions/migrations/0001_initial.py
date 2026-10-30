@@ -1,0 +1,29 @@
+# Generated for the initial four-option question model.
+import django.db.models.deletion
+from django.db import migrations, models
+
+
+class Migration(migrations.Migration):
+    initial = True
+
+    dependencies = [
+        ("exams", "0001_initial"),
+    ]
+
+    operations = [
+        migrations.CreateModel(
+            name="Question",
+            fields=[
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("text", models.TextField()),
+                ("option_a", models.CharField(max_length=500)),
+                ("option_b", models.CharField(max_length=500)),
+                ("option_c", models.CharField(max_length=500)),
+                ("option_d", models.CharField(max_length=500)),
+                ("correct_option", models.CharField(choices=[("A", "Option A"), ("B", "Option B"), ("C", "Option C"), ("D", "Option D")], max_length=1)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("exam", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name="questions", to="exams.exam")),
+            ],
+            options={"ordering": ["id"]},
+        ),
+    ]
