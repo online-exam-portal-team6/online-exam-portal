@@ -7,7 +7,7 @@ persistence remain the responsibility of the results service.
 
 from django.apps import apps
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import FieldDoesNotExist
+from django.core.exceptions import PermissionDenied
 from django.http import Http404
 from django.shortcuts import get_object_or_404, render
 
@@ -152,7 +152,7 @@ def result_detail(request, attempt_id):
     owner = _owner_field(attempt_model)
     if not request.user.is_staff:
         if owner is None or getattr(attempt, owner + "_id", None) != request.user.pk:
-            raise Http404("Result not found")
+            raise PermissionDenied
 
     result = _related_result(attempt)
     if not _is_completed(attempt, result):
