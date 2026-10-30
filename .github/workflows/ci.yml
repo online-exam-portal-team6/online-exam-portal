@@ -44,7 +44,7 @@ jobs:
 
       - name: Run Flake8
         run: |
-          fflake8 . --max-line-length=100 --extend-ignore=E501 \
+          flake8 . --max-line-length=100 --extend-ignore=E501 \
               --exclude=migrations,venv,.venv,.git,__pycache__
 
       - name: Django system check
