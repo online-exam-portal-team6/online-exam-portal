@@ -169,4 +169,12 @@ def admin_result_list(request):
     results = []
     if attempt_model is not None:
         results = _completed_attempts(attempt_model.objects.all())
-    return render(request, "results/admin_result_list.html", {"results": results})
+    passed_count = sum(
+        1 for item in results
+        if item["passed"] is True or str(item["passed"]).lower() in {"pass", "passed"}
+    )
+    return render(
+        request,
+        "results/admin_result_list.html",
+        {"results": results, "passed_count": passed_count},
+    )
