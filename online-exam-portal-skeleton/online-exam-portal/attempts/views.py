@@ -62,6 +62,8 @@ def exam_take(request, attempt_id):
             "selected_option",
         )
     )
+    for question in questions:
+        question.selected_option = saved_answers.get(question.pk)
     context = {
         "attempt": attempt,
         "exam": attempt.exam,
