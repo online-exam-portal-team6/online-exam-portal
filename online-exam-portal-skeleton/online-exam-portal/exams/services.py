@@ -1,6 +1,25 @@
-"""Exam services (contract B6). Owner: Thejas."""
+"""Exam services."""
+
+from django.utils import timezone
+
+from .models import Exam
 
 
 def get_available_exams_for(student):
-    """Active exams inside their time window that the student has not submitted; each gets .my_attempt."""
-    raise NotImplementedError("TODO (Thejas, OEP-F-010)")
+    """
+    Return active exams that are currently within their availability window.
+
+    Attempt-based exclusion will be added when the Attempt model is implemented.
+    """
+    now = timezone.now()
+
+    exams = Exam.objects.filter(
+        is_active=True,
+        start_time__lte=now,
+        end_time__gte=now,
+    ).order_by("end_time")
+
+    for exam in exams:
+        exam.my_attempt = None
+
+    return exams

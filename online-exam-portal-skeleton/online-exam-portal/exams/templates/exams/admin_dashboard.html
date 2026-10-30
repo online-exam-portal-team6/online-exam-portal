@@ -1,0 +1,211 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | OEP</title>
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+</head>
+<body>
+<div class="app-shell">
+
+    <aside class="sidebar">
+        <a href="{% url 'exams:admin_dashboard' %}" class="brand">
+            <span class="brand-icon">O</span>
+            <span>Exam<span class="brand-light">Portal</span></span>
+        </a>
+
+        <div class="sidebar-label">ADMINISTRATION</div>
+
+        <a href="{% url 'exams:admin_dashboard' %}" class="nav-link active">
+            <span>▦</span> Dashboard
+        </a>
+        <a href="{% url 'exams:exam_list' %}" class="nav-link">
+            <span>▤</span> Examinations
+        </a>
+        <a href="{% url 'accounts:student_list' %}" class="nav-link">
+            <span>♙</span> Students
+        </a>
+
+        <div class="sidebar-footer">
+            <div class="user-avatar">
+                {{ request.user.username|first|upper }}
+            </div>
+            <div class="user-details">
+                <strong>{{ request.user.first_name|default:request.user.username }}</strong>
+                <small>Administrator</small>
+            </div>
+            <form method="post" action="{% url 'accounts:logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="logout-button" title="Log out">↗</button>
+            </form>
+        </div>
+    </aside>
+
+    <main class="main-content">
+
+        <header class="topbar">
+            <div>
+                <span class="eyebrow">ADMIN WORKSPACE</span>
+                <h1>Dashboard</h1>
+            </div>
+            <div class="topbar-right">
+                <span class="status-dot"></span>
+                <span>Administrator access</span>
+            </div>
+        </header>
+
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="message">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <section class="welcome-section">
+            <div>
+                <p class="eyebrow">OVERVIEW</p>
+                <h2>Welcome back, {{ request.user.first_name|default:request.user.username }}.</h2>
+                <p class="muted">
+                    Manage examinations and keep track of your students.
+                </p>
+            </div>
+            <div class="welcome-decoration">✦</div>
+        </section>
+
+        <section class="stats-grid">
+            <article class="stat-card">
+                <div class="stat-top">
+                    <span>Total examinations</span>
+                    <span class="stat-icon purple">▤</span>
+                </div>
+                <strong>{{ exam_count }}</strong>
+                <small>All examinations created</small>
+            </article>
+
+            <article class="stat-card">
+                <div class="stat-top">
+                    <span>Active examinations</span>
+                    <span class="stat-icon green">✓</span>
+                </div>
+                <strong>{{ active_exam_count }}</strong>
+                <small>Examinations enabled by admins</small>
+            </article>
+
+            <article class="stat-card">
+                <div class="stat-top">
+                    <span>Registered students</span>
+                    <span class="stat-icon blue">♙</span>
+                </div>
+                <strong>{{ student_count }}</strong>
+                <small>Non-staff accounts</small>
+            </article>
+        </section>
+
+        <section class="section-block">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">QUICK ACTIONS</p>
+                    <h2>Manage your portal</h2>
+                </div>
+            </div>
+
+            <div class="exam-grid">
+                <article class="exam-card">
+                    <span class="stat-icon purple">＋</span>
+                    <h3>Create examination</h3>
+                    <p class="exam-description">
+                        Set up a new examination, configure its duration,
+                        and define its availability window.
+                    </p>
+                    <a href="{% url 'exams:exam_create' %}" class="primary-button">
+                        Create exam <span>→</span>
+                    </a>
+                </article>
+
+                <article class="exam-card">
+                    <span class="stat-icon blue">▤</span>
+                    <h3>Manage examinations</h3>
+                    <p class="exam-description">
+                        View your examinations and access their management options.
+                    </p>
+                    <a href="{% url 'exams:exam_list' %}" class="primary-button">
+                        View examinations <span>→</span>
+                    </a>
+                </article>
+
+                <article class="exam-card">
+                    <span class="stat-icon green">♙</span>
+                    <h3>Manage students</h3>
+                    <p class="exam-description">
+                        View registered student accounts and manage their access.
+                    </p>
+                    <a href="{% url 'accounts:student_list' %}" class="primary-button">
+                        View students <span>→</span>
+                    </a>
+                </article>
+            </div>
+        </section>
+
+        <section class="section-block">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">RECENT ACTIVITY</p>
+                    <h2>Recently created examinations</h2>
+                </div>
+                <a href="{% url 'exams:exam_list' %}" class="text-link">
+                    View all →
+                </a>
+            </div>
+
+            {% if recent_exams %}
+                <div class="exam-grid">
+                    {% for exam in recent_exams %}
+                        <article class="exam-card">
+                            <div class="exam-card-top">
+                                <span class="exam-tag">
+                                    {% if exam.is_active %}ACTIVE{% else %}INACTIVE{% endif %}
+                                </span>
+                                <span class="exam-duration">
+                                    {{ exam.duration_minutes }} min
+                                </span>
+                            </div>
+                            <h3>{{ exam.title }}</h3>
+                            <p class="exam-description">
+                                {{ exam.description|truncatewords:18 }}
+                            </p>
+                            <div class="exam-meta">
+                                <div>
+                                    <small>Created by</small>
+                                    <strong>{{ exam.created_by.username }}</strong>
+                                </div>
+                                <div>
+                                    <small>Created on</small>
+                                    <strong>{{ exam.created_at|date:"d M Y" }}</strong>
+                                </div>
+                            </div>
+                            <a href="{% url 'exams:exam_edit' exam.pk %}"
+                               class="primary-button">
+                                Edit examination <span>→</span>
+                            </a>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">▤</div>
+                    <h3>No examinations created yet</h3>
+                    <p>Create your first examination to get started.</p>
+                </div>
+            {% endif %}
+        </section>
+
+        <footer class="page-footer">
+            Online Examination Portal <span>·</span> Administration Workspace
+        </footer>
+    </main>
+</div>
+</body>
+</html>

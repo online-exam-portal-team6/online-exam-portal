@@ -1,0 +1,130 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Examinations | OEP</title>
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+</head>
+<body>
+<div class="app-shell">
+
+    <aside class="sidebar">
+        <a href="{% url 'exams:admin_dashboard' %}" class="brand">
+            <span class="brand-icon">O</span>
+            <span>Exam<span class="brand-light">Portal</span></span>
+        </a>
+
+        <div class="sidebar-label">ADMINISTRATION</div>
+        <a href="{% url 'exams:admin_dashboard' %}" class="nav-link">
+            <span>▦</span> Dashboard
+        </a>
+        <a href="{% url 'exams:exam_list' %}" class="nav-link active">
+            <span>▤</span> Examinations
+        </a>
+        <a href="{% url 'accounts:student_list' %}" class="nav-link">
+            <span>♙</span> Students
+        </a>
+
+        <div class="sidebar-footer">
+            <div class="user-avatar">{{ request.user.username|first|upper }}</div>
+            <div class="user-details">
+                <strong>{{ request.user.first_name|default:request.user.username }}</strong>
+                <small>Administrator</small>
+            </div>
+            <form method="post" action="{% url 'accounts:logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="logout-button">↗</button>
+            </form>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="topbar">
+            <div>
+                <span class="eyebrow">ADMINISTRATION</span>
+                <h1>Examinations</h1>
+            </div>
+            <a href="{% url 'exams:exam_create' %}" class="header-button">
+                + Create examination
+            </a>
+        </header>
+
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="message">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <section class="welcome-section">
+            <div>
+                <p class="eyebrow">EXAM MANAGEMENT</p>
+                <h2>All examinations</h2>
+                <p class="muted">View and manage examinations created on the portal.</p>
+            </div>
+            <div class="welcome-decoration">▤</div>
+        </section>
+
+        <section class="section-block">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">EXAM LIBRARY</p>
+                    <h2>{{ exams|length }} examinations</h2>
+                </div>
+            </div>
+
+            {% if exams %}
+                <div class="exam-grid">
+                    {% for exam in exams %}
+                        <article class="exam-card">
+                            <div class="exam-card-top">
+                                <span class="exam-tag">
+                                    {% if exam.is_active %}ACTIVE{% else %}INACTIVE{% endif %}
+                                </span>
+                                <span class="exam-duration">
+                                    {{ exam.duration_minutes }} min
+                                </span>
+                            </div>
+
+                            <h3>{{ exam.title }}</h3>
+                            <p class="exam-description">
+                                {{ exam.description|truncatewords:22 }}
+                            </p>
+
+                            <div class="exam-meta">
+                                <div>
+                                    <small>Start time</small>
+                                    <strong>{{ exam.start_time|date:"d M Y, H:i" }}</strong>
+                                </div>
+                                <div>
+                                    <small>End time</small>
+                                    <strong>{{ exam.end_time|date:"d M Y, H:i" }}</strong>
+                                </div>
+                            </div>
+
+                            <a href="{% url 'exams:exam_edit' exam.pk %}"
+                               class="primary-button">
+                                Edit examination <span>→</span>
+                            </a>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">▤</div>
+                    <h3>No examinations yet</h3>
+                    <p>Create an examination to see it listed here.</p>
+                </div>
+            {% endif %}
+        </section>
+
+        <footer class="page-footer">
+            Online Examination Portal <span>·</span> Examination Management
+        </footer>
+    </main>
+</div>
+</body>
+</html>
