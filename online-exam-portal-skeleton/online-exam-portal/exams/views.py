@@ -4,7 +4,6 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.http import HttpResponse
 from django.utils import timezone
 
-from .models import Exam
 from .services import get_available_exams_for
 from accounts.decorators import admin_required, student_required
 
@@ -12,9 +11,6 @@ from .forms import ExamForm
 from .models import Exam
 
 from django.contrib.auth import get_user_model
-
-from .models import Exam
-
 
 
 @student_required
@@ -56,7 +52,6 @@ def exam_list(request):
     exams = Exam.objects.select_related("created_by").order_by("-created_at")
 
     return render(request, "exams/exam_list.html", {"exams": exams})
-
 
 
 @admin_required
