@@ -6,8 +6,9 @@ from django.db import IntegrityError, transaction
 from django.utils import timezone
 
 from exams.models import Exam
+from questions.models import Question
 
-from .models import Attempt
+from .models import Answer, Attempt
 
 
 def start_attempt(student, exam):
@@ -15,7 +16,6 @@ def start_attempt(student, exam):
     now = timezone.now()
     if not exam.is_active or now < exam.start_time or now > exam.end_time:
         raise ValidationError("This examination is not currently available.")
-
     with transaction.atomic():
         locked_exam = Exam.objects.select_for_update().get(pk=exam.pk)
         existing = Attempt.objects.filter(student=student, exam=locked_exam).first()
@@ -25,15 +25,10 @@ def start_attempt(student, exam):
                     raise ValidationError("Your examination time has expired.")
                 return existing
             raise ValidationError("You have already completed this examination.")
-
         try:
-            # Inner atomic block creates a savepoint, so a uniqueness race does
-            # not leave the outer transaction marked as broken.
             with transaction.atomic():
                 return Attempt.objects.create(
-                    student=student,
-                    exam=locked_exam,
-                    started_at=now,
+                    student=student, exam=locked_exam, started_at=now,
                     deadline_at=now + timedelta(minutes=locked_exam.duration_minutes),
                     status=Attempt.Status.IN_PROGRESS,
                 )
@@ -45,9 +40,28 @@ def start_attempt(student, exam):
 
 
 def save_answer(attempt, question_id, option):
-    raise NotImplementedError("TODO (Bhumika, OEP-F-017)")
+    """Create or replace the selected option while the attempt is still open."""
+    if option not in Question.Option.values:
+        raise ValidationError("Select one of the available options (A, B, C or D).")
+    with transaction.atomic():
+        locked_attempt = Attempt.objects.select_for_update().select_related("exam").get(pk=attempt.pk)
+        now = timezone.now()
+        if locked_attempt.status != Attempt.Status.IN_PROGRESS:
+            raise ValidationError("This examination attempt is no longer accepting answers.")
+        if now >= locked_attempt.deadline_at:
+            raise ValidationError("The examination deadline has passed.")
+        question = Question.objects.filter(pk=question_id, exam_id=locked_attempt.exam_id).first()
+        if question is None:
+            raise ValidationError("That question does not belong to this examination.")
+        answer, _ = Answer.objects.update_or_create(
+            attempt=locked_attempt,
+            question=question,
+            defaults={"selected_option": option},
+        )
+        remaining_seconds = max(0, int((locked_attempt.deadline_at - now).total_seconds()))
+        return answer, remaining_seconds
 
 
 def submit_attempt(attempt, auto=False):
-    """Idempotent. Sets SUBMITTED / AUTO_SUBMITTED, then calls results.services.evaluate_attempt(attempt)."""
+    """Submission is implemented in OEP-F-018/019."""
     raise NotImplementedError("TODO (Bhumika, OEP-F-018/019)")
