@@ -21,9 +21,11 @@ class EmptyManager:
 class FakeAttemptModel:
     """Attempt model metadata used to exercise the view contract without owning models."""
 
-    _meta = SimpleNamespace(
-        get_fields=lambda self: [SimpleNamespace(name="student")]
-    )
+    _meta = type(
+        "Meta",
+        (),
+        {"get_fields": lambda self: [SimpleNamespace(name="student")]},
+    )()
     objects = EmptyManager()
 
 
