@@ -36,15 +36,15 @@ def exam_start(request, exam_id):
 
 @student_required
 def exam_take(request, attempt_id):
-    attempt = get_object_or_404(
-        Attempt.objects.select_related("exam"), pk=attempt_id, student=request.user
-    )
+    attempt = get_object_or_404(Attempt.objects.select_related("exam"), pk=attempt_id, student=request.user)
     if attempt.status != Attempt.Status.IN_PROGRESS:
         messages.info(request, "This examination attempt has already been submitted.")
         return redirect("exams:student_dashboard")
     remaining_seconds = max(0, math.ceil((attempt.deadline_at - timezone.now()).total_seconds()))
-    questions = Question.objects.filter(exam=attempt.exam).order_by("id")
+    questions = list(Question.objects.filter(exam=attempt.exam).order_by("id"))
     saved_answers = dict(attempt.answers.values_list("question_id", "selected_option"))
+    for question in questions:
+        question.selected_option = saved_answers.get(question.pk)
     context = {
         "attempt": attempt, "exam": attempt.exam, "questions": questions,
         "saved_answers": saved_answers, "remaining_seconds": remaining_seconds,
@@ -72,10 +72,8 @@ def save_answer(request, attempt_id):
         return JsonResponse({"ok": False, "error": "Invalid JSON request."}, status=400)
     except ValidationError as exc:
         return JsonResponse({"ok": False, "error": " ".join(exc.messages)}, status=400)
-    return JsonResponse({
-        "ok": True, "question_id": answer.question_id,
-        "option": answer.selected_option, "remaining_seconds": remaining_seconds,
-    })
+    return JsonResponse({"ok": True, "question_id": answer.question_id,
+                         "option": answer.selected_option, "remaining_seconds": remaining_seconds})
 
 
 @student_required
