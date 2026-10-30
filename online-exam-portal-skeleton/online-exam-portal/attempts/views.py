@@ -61,6 +61,8 @@ def save_answer(request, attempt_id):
     attempt = get_object_or_404(Attempt, pk=attempt_id, student=request.user)
     try:
         payload = json.loads(request.body or b"{}")
+        if not isinstance(payload, dict):
+            raise ValidationError("The request body must be a JSON object.")
         question_id = payload.get("question_id")
         option = payload.get("option")
         if isinstance(question_id, bool) or not isinstance(question_id, int):
