@@ -12,6 +12,7 @@ from django.http import Http404
 from django.shortcuts import get_object_or_404, render
 
 from accounts.decorators import admin_required, student_required
+from .models import Result
 
 
 def _attempt_model():
@@ -164,15 +165,30 @@ def result_detail(request, attempt_id):
 
 @admin_required
 def admin_result_list(request):
-    """Show completed results across students to administrators."""
-    attempt_model = _attempt_model()
-    results = []
-    if attempt_model is not None:
-        results = _completed_attempts(attempt_model.objects.all())
-    passed_count = sum(
-        1 for item in results
-        if item["passed"] is True or str(item["passed"]).lower() in {"pass", "passed"}
-    )
+    """Show persisted results for completed examinations to administrators."""
+    records = Result.objects.select_related(
+        "attempt", "student", "exam"
+    ).order_by("-created_at")
+    results = [
+        {
+            "attempt_id": result.attempt_id,
+            "student_name": (
+                result.student.get_full_name() or result.student.get_username()
+            ),
+            "exam_title": result.exam.title,
+            "score": result.score,
+            "total_marks": result.total_marks,
+            "percentage": result.percentage,
+            "passed": result.passed,
+            "completed_at": result.attempt.submitted_at,
+        }
+        for result in records
+        if result.attempt.status in (
+            result.attempt.Status.SUBMITTED,
+            result.attempt.Status.AUTO_SUBMITTED,
+        )
+    ]
+    passed_count = sum(1 for item in results if item["passed"])
     return render(
         request,
         "results/admin_result_list.html",
