@@ -1,0 +1,165 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ exam.title }} | Exam Portal</title>
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <style>
+        .exam-layout { max-width: 980px; margin: 0 auto; }
+        .exam-toolbar { display:flex; justify-content:space-between; align-items:center; gap:16px; padding:20px 0; border-bottom:1px solid #252833; }
+        .timer-panel { position:sticky; top:12px; z-index:2; display:flex; align-items:center; justify-content:space-between; gap:14px; padding:15px 18px; margin:22px 0; background:#211d34; border:1px solid #51466f; border-radius:12px; }
+        .timer-value { font:800 24px 'Manrope',sans-serif; color:#c1b8ff; font-variant-numeric:tabular-nums; }
+        .question-card { padding:22px; margin:16px 0; background:#15171e; border:1px solid #252833; border-radius:12px; }
+        .question-number { color:#9b8cff; font-size:11px; font-weight:700; letter-spacing:1px; }
+        .question-card h2 { margin:10px 0 18px; font:600 16px 'Manrope',sans-serif; line-height:1.6; }
+        .option-label { display:flex; align-items:flex-start; gap:12px; padding:13px; margin:8px 0; background:#101117; border:1px solid #30333e; border-radius:8px; color:#d8d8e2; cursor:pointer; font-size:13px; }
+        .option-label:has(input:checked) { border-color:#9b8cff; background:#242033; }
+        .option-label input { accent-color:#9b8cff; margin-top:3px; }
+        .expired-message { padding:14px; margin:16px 0; background:#422b30; color:#ff9999; border-radius:8px; }
+        .answer-feedback { min-height:20px; color:#b9b4d5; font-size:12px; margin:10px 0; }
+        .submit-panel { display:flex; justify-content:space-between; align-items:center; gap:16px; padding:20px 0 40px; }
+        .submit-button { border:0; cursor:pointer; }
+        .submit-button:disabled { opacity:.55; cursor:not-allowed; }
+        @media(max-width:600px) { .exam-toolbar,.timer-panel,.submit-panel { align-items:flex-start; flex-direction:column; } }
+    </style>
+</head>
+<body>
+<main class="main-content exam-layout">
+    <header class="exam-toolbar">
+        <div>
+            <p class="eyebrow">EXAMINATION IN PROGRESS</p>
+            <h1>{{ exam.title }}</h1>
+            <p class="muted">Your answers are saved as you select them. The server deadline is authoritative.</p>
+        </div>
+        <span class="exam-tag">{{ questions|length }} QUESTIONS</span>
+    </header>
+    <section class="timer-panel" aria-live="polite">
+        <div>
+            <p class="eyebrow">TIME REMAINING</p>
+            <p class="muted">Your attempt will be submitted when time expires.</p>
+        </div>
+        <strong class="timer-value" id="exam-timer" data-remaining="{{ remaining_seconds }}">--:--</strong>
+    </section>
+    {% if is_expired %}
+        <p class="expired-message" role="alert">Your exam time has expired. Submit your attempt now.</p>
+    {% endif %}
+    {% if questions %}
+        <form id="exam-form" method="post" action="{{ submit_url }}" data-answer-url="{{ answer_url }}">
+            {% csrf_token %}
+            {% for question in questions %}
+                <article class="question-card" data-question-id="{{ question.id }}">
+                    <p class="question-number">QUESTION {{ forloop.counter }}</p>
+                    <h2>{{ question.text }}</h2>
+                    {% for key, option_text in question.options %}
+                        <label class="option-label">
+                            <input
+                                type="radio"
+                                name="question_{{ question.id }}"
+                                value="{{ key }}"
+                                {% if question.selected_option == key %}checked{% endif %}
+                                {% if is_expired %}disabled{% endif %}
+                            >
+                            <span><strong>{{ key }}.</strong> {{ option_text }}</span>
+                        </label>
+                    {% endfor %}
+                    <p class="answer-feedback" aria-live="polite"></p>
+                </article>
+            {% endfor %}
+            <div class="submit-panel">
+                <p class="muted" id="save-status" role="status">Your selected answers are saved automatically.</p>
+                <button class="primary-button submit-button" id="submit-exam" type="submit">Submit examination</button>
+            </div>
+        </form>
+    {% else %}
+        <section class="empty-state">
+            <h2>No questions have been added yet</h2>
+            <p>Please contact the examination administrator.</p>
+        </section>
+    {% endif %}
+</main>
+<script>
+(function () {
+    const form = document.getElementById("exam-form");
+    const timer = document.getElementById("exam-timer");
+    if (!form || !timer) return;
+
+    const answerUrl = form.dataset.answerUrl;
+    const csrfToken = form.querySelector("[name=csrfmiddlewaretoken]").value;
+    const saveStatus = document.getElementById("save-status");
+    const submitButton = document.getElementById("submit-exam");
+    let remaining = Math.max(0, Number(timer.dataset.remaining || 0));
+    let submitting = false;
+
+    async function submitExam() {
+        if (submitting) return;
+        submitting = true;
+        submitButton.disabled = true;
+        submitButton.textContent = "Submitting…";
+        form.requestSubmit();
+    }
+
+    form.querySelectorAll('input[type="radio"]').forEach(function (input) {
+        input.addEventListener("change", async function () {
+            const card = input.closest("[data-question-id]");
+            const feedback = card.querySelector(".answer-feedback");
+            feedback.textContent = "Saving…";
+            saveStatus.textContent = "Saving your answer…";
+            try {
+                const response = await fetch(answerUrl, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": csrfToken
+                    },
+                    body: JSON.stringify({
+                        question_id: Number(card.dataset.questionId),
+                        option: input.value
+                    })
+                });
+                const data = await response.json();
+                if (response.status === 403 && data.expired) {
+                    feedback.textContent = "Time expired. Submitting your attempt…";
+                    await submitExam();
+                    return;
+                }
+                if (!response.ok || !data.ok) {
+                    throw new Error(data.error || "Unable to save this answer.");
+                }
+                feedback.textContent = "Saved";
+                saveStatus.textContent = "All selected answers are saved.";
+            } catch (error) {
+                feedback.textContent = error.message;
+                saveStatus.textContent = "An answer could not be saved. Please retry before submitting.";
+            }
+        });
+    });
+
+    form.addEventListener("submit", function (event) {
+        if (submitting) return;
+        event.preventDefault();
+        if (!window.confirm("Are you sure you want to submit your examination?")) return;
+        submitting = true;
+        submitButton.disabled = true;
+        submitButton.textContent = "Submitting…";
+        form.submit();
+    });
+
+    function renderTimer() {
+        const minutes = Math.floor(remaining / 60);
+        const seconds = remaining % 60;
+        timer.textContent = String(minutes).padStart(2, "0") + ":" + String(seconds).padStart(2, "0");
+        if (remaining <= 0) {
+            timer.setAttribute("aria-label", "Time expired");
+            submitExam();
+            return;
+        }
+        remaining -= 1;
+        window.setTimeout(renderTimer, 1000);
+    }
+    renderTimer();
+}());
+</script>
+</body>
+</html>
