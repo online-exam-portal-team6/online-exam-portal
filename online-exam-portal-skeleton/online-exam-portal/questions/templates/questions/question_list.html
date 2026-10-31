@@ -58,6 +58,13 @@
 
         .question-actions {
             margin-top: 14px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .button-danger {
+            background: #b91c1c;
         }
 
         .empty {
@@ -109,6 +116,10 @@
                 <a class="button"
                    href="{% url 'questions:question_edit' exam.id question.id %}">
                     Edit question
+                </a>
+                <a class="button button-danger"
+                   href="{% url 'questions:question_delete' exam.id question.id %}">
+                    Delete question
                 </a>
             </div>
         </div>

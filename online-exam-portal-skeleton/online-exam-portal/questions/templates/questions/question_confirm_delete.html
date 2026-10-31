@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete Question - {{ exam.title }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6fa;
+            margin: 0;
+            padding: 35px;
+            color: #1f2937;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .option {
+            padding: 9px 12px;
+            margin: 7px 0;
+            background: #f3f4f6;
+            border-radius: 6px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        button, .cancel {
+            padding: 11px 18px;
+            border: 0;
+            border-radius: 7px;
+            font-size: 15px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        button {
+            background: #b91c1c;
+            color: white;
+        }
+
+        .cancel {
+            background: #e5e7eb;
+            color: #1f2937;
+        }
+    </style>
+</head>
+<body>
+<main class="container">
+    <h1>Delete question?</h1>
+    <p>Are you sure you want to remove this question from {{ exam.title }}?</p>
+    <h2>{{ question.text }}</h2>
+    <div class="option">A. {{ question.option_a }}</div>
+    <div class="option">B. {{ question.option_b }}</div>
+    <div class="option">C. {{ question.option_c }}</div>
+    <div class="option">D. {{ question.option_d }}</div>
+
+    <div class="actions">
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit">Confirm delete</button>
+        </form>
+        <a class="cancel" href="{% url 'questions:question_list' exam.id %}">
+            Cancel
+        </a>
+    </div>
+</main>
+</body>
+</html>
