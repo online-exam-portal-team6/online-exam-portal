@@ -3,6 +3,7 @@ from datetime import timedelta
 
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
+from django.db.models import F
 from django.utils import timezone
 
 from exams.models import Exam
@@ -79,7 +80,7 @@ def submit_attempt(attempt):
         correct_count = Answer.objects.filter(
             attempt=locked_attempt,
             question__exam_id=locked_attempt.exam_id,
-            selected_option=models_f("question__correct_option"),
+            selected_option=F("question__correct_option"),
         ).count()
         locked_attempt.score = correct_count
         locked_attempt.total_questions = total_questions
@@ -90,5 +91,3 @@ def submit_attempt(attempt):
         ])
         return locked_attempt
 
-
-from django.db.models import F as models_f
