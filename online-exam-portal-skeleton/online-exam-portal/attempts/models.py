@@ -39,3 +39,38 @@ class Attempt(models.Model):
 
     def __str__(self):
         return f"{self.student} - {self.exam} ({self.get_status_display()})"
+
+
+class AttemptAnswer(models.Model):
+    """The latest selected option for one question in one attempt."""
+
+    class Option(models.TextChoices):
+        A = "A", "Option A"
+        B = "B", "Option B"
+        C = "C", "Option C"
+        D = "D", "Option D"
+
+    attempt = models.ForeignKey(
+        Attempt,
+        on_delete=models.CASCADE,
+        related_name="answers",
+    )
+    question = models.ForeignKey(
+        "questions.Question",
+        on_delete=models.PROTECT,
+        related_name="attempt_answers",
+    )
+    selected_option = models.CharField(max_length=1, choices=Option.choices)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["question_id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["attempt", "question"],
+                name="unique_answer_per_attempt_question",
+            )
+        ]
+
+    def __str__(self):
+        return f"Attempt {self.attempt_id}, question {self.question_id}: {self.selected_option}"
