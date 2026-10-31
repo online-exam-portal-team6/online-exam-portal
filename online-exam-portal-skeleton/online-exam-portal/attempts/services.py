@@ -63,8 +63,8 @@ def save_answer(attempt, question_id, option):
         return answer, remaining_seconds
 
 
-def submit_attempt(attempt):
-    """Grade and finalize an in-progress attempt exactly once."""
+def submit_attempt(attempt, auto=False):
+    """Grade and finalize an attempt manually or when its deadline expires."""
     with transaction.atomic():
         locked_attempt = (
             Attempt.objects.select_for_update()
@@ -73,10 +73,12 @@ def submit_attempt(attempt):
         )
         if locked_attempt.status != Attempt.Status.IN_PROGRESS:
             return locked_attempt
-        if timezone.now() >= locked_attempt.deadline_at:
+        now = timezone.now()
+        if auto and now < locked_attempt.deadline_at:
+            raise ValidationError("The examination deadline has not been reached.")
+        if not auto and now >= locked_attempt.deadline_at:
             raise ValidationError("The examination time has expired.")
-        questions = Question.objects.filter(exam_id=locked_attempt.exam_id)
-        total_questions = questions.count()
+        total_questions = Question.objects.filter(exam_id=locked_attempt.exam_id).count()
         correct_count = Answer.objects.filter(
             attempt=locked_attempt,
             question__exam_id=locked_attempt.exam_id,
@@ -84,10 +86,11 @@ def submit_attempt(attempt):
         ).count()
         locked_attempt.score = correct_count
         locked_attempt.total_questions = total_questions
-        locked_attempt.status = Attempt.Status.SUBMITTED
-        locked_attempt.submitted_at = timezone.now()
+        locked_attempt.status = (
+            Attempt.Status.AUTO_SUBMITTED if auto else Attempt.Status.SUBMITTED
+        )
+        locked_attempt.submitted_at = now
         locked_attempt.save(update_fields=[
             "score", "total_questions", "status", "submitted_at"
         ])
         return locked_attempt
-

@@ -40,6 +40,10 @@ def exam_take(request, attempt_id):
     if attempt.status != Attempt.Status.IN_PROGRESS:
         return redirect("attempts:exam_result", attempt_id=attempt.pk)
     remaining_seconds = max(0, math.ceil((attempt.deadline_at - timezone.now()).total_seconds()))
+    if remaining_seconds <= 0:
+        attempt = submit_attempt(attempt, auto=True)
+        messages.info(request, "Time expired. Your examination was submitted automatically.")
+        return redirect("attempts:exam_result", attempt_id=attempt.pk)
     questions = list(Question.objects.filter(exam=attempt.exam).order_by("id"))
     saved_answers = dict(attempt.answers.values_list("question_id", "selected_option"))
     for question in questions:
@@ -49,7 +53,8 @@ def exam_take(request, attempt_id):
         "saved_answers": saved_answers, "remaining_seconds": remaining_seconds,
         "answer_url": reverse("attempts:save_answer", args=[attempt.pk]),
         "submit_url": reverse("attempts:exam_submit", args=[attempt.pk]),
-        "is_expired": remaining_seconds <= 0,
+        "auto_submit_url": reverse("attempts:exam_auto_submit", args=[attempt.pk]),
+        "is_expired": False,
     }
     return render(request, "attempts/exam_take.html", context)
 
@@ -88,6 +93,21 @@ def exam_submit(request, attempt_id):
         return redirect("attempts:exam_take", attempt_id=attempt.pk)
     messages.success(request, "Your examination has been submitted successfully.")
     return redirect("attempts:exam_result", attempt_id=attempt.pk)
+
+
+@student_required
+@require_POST
+def exam_auto_submit(request, attempt_id):
+    attempt = get_object_or_404(Attempt, pk=attempt_id, student=request.user)
+    try:
+        attempt = submit_attempt(attempt, auto=True)
+    except ValidationError as exc:
+        return JsonResponse({"ok": False, "error": " ".join(exc.messages)}, status=400)
+    return JsonResponse({
+        "ok": True,
+        "status": attempt.status,
+        "result_url": reverse("attempts:exam_result", args=[attempt.pk]),
+    })
 
 
 @student_required
