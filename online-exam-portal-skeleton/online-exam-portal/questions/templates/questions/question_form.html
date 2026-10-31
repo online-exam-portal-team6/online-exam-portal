@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Question - {{ exam.title }}</title>
+    <title>{% if question %}Edit{% else %}Add{% endif %} Question - {{ exam.title }}</title>
 
     <style>
         body {
@@ -98,7 +98,7 @@
 <body>
 <div class="container">
 
-    <h1>Add MCQ Question</h1>
+    <h1>{% if question %}Edit{% else %}Add{% endif %} MCQ Question</h1>
     <p class="exam-title">Examination: {{ exam.title }}</p>
 
     {% if messages %}
@@ -113,7 +113,9 @@
         {{ form.as_p }}
 
         <div class="buttons">
-            <button type="submit">Save Question</button>
+            <button type="submit">
+                {% if question %}Update Question{% else %}Save Question{% endif %}
+            </button>
 
             <a class="cancel"
                href="{% url 'questions:question_list' exam.id %}">

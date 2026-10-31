@@ -58,8 +58,28 @@ def question_create(request, exam_id):
 
 @admin_required
 def question_edit(request, exam_id, pk):
-    # TODO (Thejas, OEP-F-012): context form, exam, and question.
-    return HttpResponse("TODO (Thejas): question edit")
+    """Edit an MCQ question belonging to an examination."""
+    exam = get_object_or_404(Exam, pk=exam_id)
+    question = get_object_or_404(Question, pk=pk, exam=exam)
+
+    if request.method == "POST":
+        form = QuestionForm(request.POST, instance=question)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Question updated successfully.")
+            return redirect("questions:question_list", exam_id=exam.id)
+    else:
+        form = QuestionForm(instance=question)
+
+    return render(
+        request,
+        "questions/question_form.html",
+        {
+            "form": form,
+            "exam": exam,
+            "question": question,
+        },
+    )
 
 
 @admin_required

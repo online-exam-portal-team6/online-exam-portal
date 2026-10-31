@@ -56,6 +56,10 @@
             border-radius: 7px;
         }
 
+        .question-actions {
+            margin-top: 14px;
+        }
+
         .empty {
             background: white;
             padding: 30px;
@@ -99,6 +103,13 @@
 
             <div class="option {% if question.correct_option == 'D' %}correct{% endif %}">
                 D. {{ question.option_d }}
+            </div>
+
+            <div class="question-actions">
+                <a class="button"
+                   href="{% url 'questions:question_edit' exam.id question.id %}">
+                    Edit question
+                </a>
             </div>
         </div>
     {% empty %}
