@@ -7,7 +7,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from attempts.models import Attempt
+from attempts.models import Attempt, AttemptAnswer
 from exams.models import Exam
 from questions.models import Question
 from results.services import evaluate_attempt
@@ -48,6 +48,11 @@ class AdminResultRegisterTests(TestCase):
             option_d="D",
             correct_option="A",
             marks=1,
+        )
+        AttemptAnswer.objects.create(
+            attempt=self.attempt,
+            question=Question.objects.get(exam=self.exam),
+            selected_option="A",
         )
         evaluate_attempt(self.attempt)
 
