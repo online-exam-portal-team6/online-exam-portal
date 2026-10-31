@@ -11,7 +11,6 @@ from .forms import QuestionForm
 from .models import Question
 
 
-
 @admin_required
 def question_list(request, exam_id):
     """Display all questions belonging to an examination."""
@@ -26,7 +25,6 @@ def question_list(request, exam_id):
             "questions": questions,
         },
     )
-
 
 
 @admin_required
@@ -60,11 +58,11 @@ def question_create(request, exam_id):
 
 @admin_required
 def question_edit(request, exam_id, pk):
-    # TODO (Thejas, OEP-F-012): context form, exam, question
+    # TODO (Thejas, OEP-F-012): context form, exam, and question.
     return HttpResponse("TODO (Thejas): question edit")
 
 
 @admin_required
 def question_delete(request, exam_id, pk):
-    # TODO (Thejas, OEP-F-013): confirm page (context exam, question); POST deletes
+    # TODO (Thejas, OEP-F-013): show confirmation; delete only on POST.
     return HttpResponse("TODO (Thejas): question delete")
