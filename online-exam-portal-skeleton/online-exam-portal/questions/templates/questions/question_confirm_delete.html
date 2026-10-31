@@ -1,0 +1,40 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete question | Exam Portal</title>
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'css/questions.css' %}">
+</head>
+<body>
+<div class="app-shell">
+    <aside class="sidebar">
+        <a href="{% url 'exams:admin_dashboard' %}" class="brand"><span class="brand-icon">O</span><span>Exam<span class="brand-light">Portal</span></span></a>
+        <div class="sidebar-label">ADMINISTRATION</div>
+        <a href="{% url 'exams:admin_dashboard' %}" class="nav-link">▦ Dashboard</a>
+        <a href="{% url 'exams:exam_list' %}" class="nav-link active">▤ Examinations</a>
+        <a href="{% url 'accounts:student_list' %}" class="nav-link">♙ Students</a>
+        <a href="{% url 'results:admin_result_list' %}" class="nav-link">▣ Results</a>
+    </aside>
+    <main class="main-content">
+        <header class="topbar"><div><span class="eyebrow">QUESTION MANAGEMENT</span><h1>Delete question</h1></div></header>
+        <section class="delete-panel">
+            <div class="delete-icon">!</div>
+            <p class="eyebrow">CONFIRM ACTION</p>
+            <h2>Delete this question?</h2>
+            <p class="muted">This will permanently remove the question from {{ exam.title }}. This action cannot be undone.</p>
+            <blockquote>{{ question.text }}</blockquote>
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-actions">
+                    <a class="secondary-button" href="{% url 'questions:question_list' exam.id %}">Keep question</a>
+                    <button class="danger-button" type="submit">Yes, delete question</button>
+                </div>
+            </form>
+        </section>
+    </main>
+</div>
+</body>
+</html>
