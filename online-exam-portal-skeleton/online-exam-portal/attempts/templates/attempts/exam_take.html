@@ -12,7 +12,8 @@
         .timer-value{font-size:24px;color:#c1b8ff;font-variant-numeric:tabular-nums}.question-card{padding:22px;margin:16px 0;background:#15171e;border:1px solid #30333e;border-radius:12px}
         .option-label{display:flex;gap:12px;padding:13px;margin:8px 0;border:1px solid #30333e;border-radius:8px;cursor:pointer}
         .option-label:has(input:checked){border-color:#9b8cff;background:#242033}.save-status{min-height:1.3em;color:#bdb4f5;font-size:12px}.save-status.error{color:#ff9999}
-        @media(max-width:600px){.exam-toolbar,.timer-panel{align-items:flex-start;flex-direction:column}}
+        .submit-panel{display:flex;justify-content:flex-end;gap:12px;padding:20px 0}.submit-button{padding:12px 22px;border:0;border-radius:8px;background:#7562d8;color:white;font-weight:700;cursor:pointer}
+        @media(max-width:600px){.exam-toolbar,.timer-panel{align-items:flex-start;flex-direction:column}.submit-panel{justify-content:stretch}.submit-button{width:100%}}
     </style>
 </head>
 <body>
@@ -27,6 +28,10 @@
             <label class="option-label"><input type="radio" name="question_{{ question.id }}" value="{{ key }}" {% if question.selected_option == key %}checked{% endif %} {% if is_expired %}disabled{% endif %}><span><strong>{{ key }}.</strong> {{ option_text }}</span></label>
         {% endfor %}</article>
     {% empty %}<p>No questions have been added yet.</p>{% endfor %}
+    <form class="submit-panel" method="post" action="{{ submit_url }}" onsubmit="return confirm('Are you sure you want to submit? You cannot change your answers afterwards.');">
+        {% csrf_token %}
+        <button class="submit-button" type="submit">Submit examination</button>
+    </form>
 </main>
 <script>
 (function(){

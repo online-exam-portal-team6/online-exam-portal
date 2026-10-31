@@ -4,7 +4,7 @@ import math
 
 from django.contrib import messages
 from django.core.exceptions import ValidationError
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -16,7 +16,7 @@ from questions.models import Question
 
 from .models import Attempt
 from .services import save_answer as save_attempt_answer
-from .services import start_attempt
+from .services import start_attempt, submit_attempt
 
 
 @student_required
@@ -38,8 +38,7 @@ def exam_start(request, exam_id):
 def exam_take(request, attempt_id):
     attempt = get_object_or_404(Attempt.objects.select_related("exam"), pk=attempt_id, student=request.user)
     if attempt.status != Attempt.Status.IN_PROGRESS:
-        messages.info(request, "This examination attempt has already been submitted.")
-        return redirect("exams:student_dashboard")
+        return redirect("attempts:exam_result", attempt_id=attempt.pk)
     remaining_seconds = max(0, math.ceil((attempt.deadline_at - timezone.now()).total_seconds()))
     questions = list(Question.objects.filter(exam=attempt.exam).order_by("id"))
     saved_answers = dict(attempt.answers.values_list("question_id", "selected_option"))
@@ -81,4 +80,30 @@ def save_answer(request, attempt_id):
 @student_required
 @require_POST
 def exam_submit(request, attempt_id):
-    return HttpResponse("TODO (Bhumika, OEP-F-018/019)")
+    attempt = get_object_or_404(Attempt, pk=attempt_id, student=request.user)
+    try:
+        attempt = submit_attempt(attempt)
+    except ValidationError as exc:
+        messages.error(request, " ".join(exc.messages))
+        return redirect("attempts:exam_take", attempt_id=attempt.pk)
+    messages.success(request, "Your examination has been submitted successfully.")
+    return redirect("attempts:exam_result", attempt_id=attempt.pk)
+
+
+@student_required
+def exam_result(request, attempt_id):
+    attempt = get_object_or_404(
+        Attempt.objects.select_related("exam"),
+        pk=attempt_id,
+        student=request.user,
+    )
+    if attempt.status == Attempt.Status.IN_PROGRESS:
+        return redirect("attempts:exam_take", attempt_id=attempt.pk)
+    percentage = (
+        round(attempt.score * 100 / attempt.total_questions, 2)
+        if attempt.total_questions else 0
+    )
+    return render(request, "attempts/exam_result.html", {
+        "attempt": attempt,
+        "percentage": percentage,
+    })
