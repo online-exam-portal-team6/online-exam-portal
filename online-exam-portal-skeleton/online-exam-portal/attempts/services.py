@@ -62,6 +62,33 @@ def save_answer(attempt, question_id, option):
         return answer, remaining_seconds
 
 
-def submit_attempt(attempt, auto=False):
-    """Submission is implemented in OEP-F-018/019."""
-    raise NotImplementedError("TODO (Bhumika, OEP-F-018/019)")
+def submit_attempt(attempt):
+    """Grade and finalize an in-progress attempt exactly once."""
+    with transaction.atomic():
+        locked_attempt = (
+            Attempt.objects.select_for_update()
+            .select_related("exam")
+            .get(pk=attempt.pk)
+        )
+        if locked_attempt.status != Attempt.Status.IN_PROGRESS:
+            return locked_attempt
+        if timezone.now() >= locked_attempt.deadline_at:
+            raise ValidationError("The examination time has expired.")
+        questions = Question.objects.filter(exam_id=locked_attempt.exam_id)
+        total_questions = questions.count()
+        correct_count = Answer.objects.filter(
+            attempt=locked_attempt,
+            question__exam_id=locked_attempt.exam_id,
+            selected_option=models_f("question__correct_option"),
+        ).count()
+        locked_attempt.score = correct_count
+        locked_attempt.total_questions = total_questions
+        locked_attempt.status = Attempt.Status.SUBMITTED
+        locked_attempt.submitted_at = timezone.now()
+        locked_attempt.save(update_fields=[
+            "score", "total_questions", "status", "submitted_at"
+        ])
+        return locked_attempt
+
+
+from django.db.models import F as models_f
