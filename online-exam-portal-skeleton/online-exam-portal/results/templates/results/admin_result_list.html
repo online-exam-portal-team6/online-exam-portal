@@ -1,0 +1,70 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Examination Results | OEP</title>
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'css/results.css' %}">
+</head>
+<body>
+<div class="app-shell">
+    <aside class="sidebar">
+        <a href="{% url 'exams:admin_dashboard' %}" class="brand"><span class="brand-icon">O</span><span>Exam<span class="brand-light">Portal</span></span></a>
+        <div class="sidebar-label">ADMINISTRATION</div>
+        <a href="{% url 'exams:admin_dashboard' %}" class="nav-link">▦ Dashboard</a>
+        <a href="{% url 'exams:exam_list' %}" class="nav-link">▤ Examinations</a>
+        <a href="{% url 'accounts:student_list' %}" class="nav-link">♙ Students</a>
+        <a href="{% url 'results:admin_result_list' %}" class="nav-link active">▣ Results</a>
+        <div class="sidebar-footer">
+            <div class="user-avatar">{{ request.user.username|first|upper }}</div>
+            <div class="user-details"><strong>{{ request.user.first_name|default:request.user.username }}</strong><small>Administrator</small></div>
+            <form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}<button type="submit" class="logout-button" title="Log out">↗</button></form>
+        </div>
+    </aside>
+    <main class="main-content">
+        <header class="topbar"><div><span class="eyebrow">ADMINISTRATION</span><h1>Examination results</h1></div><div class="topbar-right"><span class="status-dot"></span>Administrator access</div></header>
+        <section class="welcome-section">
+            <div><p class="eyebrow">RESULTS OVERVIEW</p><h2>Student performance</h2><p class="muted">Review scores and outcomes for completed examinations.</p></div>
+            <div class="welcome-decoration">▣</div>
+        </section>
+        <section class="stats-grid">
+            <article class="stat-card"><div class="stat-top"><span>Completed results</span><span class="stat-icon purple">▣</span></div><strong>{{ results|length }}</strong><small>Evaluated submissions</small></article>
+            <article class="stat-card"><div class="stat-top"><span>Passed</span><span class="stat-icon green">✓</span></div><strong>{{ passed_count }}</strong><small>Met the configured pass mark</small></article>
+            <article class="stat-card"><div class="stat-top"><span>Access</span><span class="stat-icon blue">◎</span></div><strong class="account-status">Admin</strong><small>All students and examinations</small></article>
+        </section>
+        <section class="section-block">
+            <div class="section-heading"><div><p class="eyebrow">RESULT REGISTER</p><h2>Completed submissions</h2></div><span class="count-pill">{{ results|length }} results</span></div>
+            {% if results %}
+                <div class="student-table-wrapper">
+                    <table class="student-table results-table">
+                        <thead><tr><th>STUDENT</th><th>EXAMINATION</th><th>SCORE</th><th>PERCENTAGE</th><th>OUTCOME</th><th>SUBMITTED</th><th>DETAILS</th></tr></thead>
+                        <tbody>
+                        {% for item in results %}
+                            <tr>
+                                <td><strong>{{ item.student_name }}</strong></td>
+                                <td>{{ item.exam_title }}</td>
+                                <td>{% if item.score != None %}{{ item.score }}{% else %}—{% endif %}{% if item.total_marks != None %} / {{ item.total_marks }}{% endif %}</td>
+                                <td>{% if item.percentage != None %}{{ item.percentage|floatformat:2 }}%{% else %}—{% endif %}</td>
+                                <td>
+                                    {% if item.passed == True or item.passed == "Pass" or item.passed == "PASS" %}<span class="result-status passed">Passed</span>
+                                    {% elif item.passed == False or item.passed == "Fail" or item.passed == "FAIL" %}<span class="result-status failed">Not passed</span>
+                                    {% else %}<span class="result-status pending">Evaluated</span>{% endif %}
+                                </td>
+                                <td>{% if item.completed_at %}{{ item.completed_at|date:"d M Y, H:i" }}{% else %}—{% endif %}</td>
+                                <td><a class="text-link" href="{% url 'results:result_detail' item.attempt_id %}">View →</a></td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="empty-state"><div class="empty-icon">▣</div><h3>No completed results yet</h3><p>When students submit examinations and their results are evaluated, records will appear here.</p></div>
+            {% endif %}
+        </section>
+        <footer class="page-footer">Online Examination Portal <span>·</span> Results Administration</footer>
+    </main>
+</div>
+</body>
+</html>
