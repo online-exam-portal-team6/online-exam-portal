@@ -1,0 +1,27 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam submitted | Exam Portal</title>
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <style>
+        .result-card{max-width:680px;margin:48px auto;padding:32px;border:1px solid #383345;border-radius:14px;background:#17151f;text-align:center}
+        .score{font-size:48px;font-weight:800;color:#c1b8ff;margin:18px 0}.result-meta{color:#bcb8c8}
+    </style>
+</head>
+<body>
+<main class="main-content">
+    <section class="result-card">
+        <p class="eyebrow">EXAMINATION SUBMITTED</p>
+        <h1>{{ attempt.exam.title }}</h1>
+        <p>Your answers have been submitted successfully.</p>
+        <p class="score">{{ attempt.score }} / {{ attempt.total_questions }}</p>
+        <p class="result-meta">Score: {{ percentage }}% · Status: {{ attempt.get_status_display }}</p>
+        <p class="result-meta">Submitted at {{ attempt.submitted_at|date:"M j, Y, g:i a" }}</p>
+        <a href="{% url 'exams:student_dashboard' %}">Return to dashboard</a>
+    </section>
+</main>
+</body>
+</html>
