@@ -105,10 +105,17 @@
                                 </div>
                             </div>
 
+                            <div class="exam-actions">
                             <a href="{% url 'exams:exam_edit' exam.pk %}"
-                               class="primary-button">
-                                Edit examination <span>→</span>
+                            class="primary-button">
+                            Edit examination
                             </a>
+
+                            <a href="{% url 'questions:question_list' exam.id %}"
+                            class="secondary-button">
+                            Manage Questions
+                            </a>
+</div>
                         </article>
                     {% endfor %}
                 </div>
