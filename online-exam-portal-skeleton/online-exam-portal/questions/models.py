@@ -20,6 +20,7 @@ class Question(models.Model):
     option_c = models.CharField(max_length=500)
     option_d = models.CharField(max_length=500)
     correct_option = models.CharField(max_length=1, choices=Option.choices)
+    marks = models.PositiveIntegerField(default=1)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

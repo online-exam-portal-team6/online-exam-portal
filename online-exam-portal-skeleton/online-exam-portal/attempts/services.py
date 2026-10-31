@@ -96,11 +96,5 @@ def submit_attempt(attempt, auto=False):
 
     from results.services import evaluate_attempt
 
-    try:
-        evaluate_attempt(locked_attempt)
-    except NotImplementedError:
-        # The evaluator is a separately owned service (OEP-F-020/021/022).
-        # Keep the student's submission recorded while that dependency lands.
-        pass
-
+    evaluate_attempt(locked_attempt)
     return locked_attempt
