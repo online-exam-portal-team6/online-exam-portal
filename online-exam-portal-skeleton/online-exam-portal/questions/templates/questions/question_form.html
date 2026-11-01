@@ -1,0 +1,47 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if question %}Edit question{% else %}Add question{% endif %} | Exam Portal</title>
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'css/questions.css' %}">
+</head>
+<body>
+<div class="app-shell">
+    <aside class="sidebar">
+        <a href="{% url 'exams:admin_dashboard' %}" class="brand"><span class="brand-icon">O</span><span>Exam<span class="brand-light">Portal</span></span></a>
+        <div class="sidebar-label">ADMINISTRATION</div>
+        <a href="{% url 'exams:admin_dashboard' %}" class="nav-link">▦ Dashboard</a>
+        <a href="{% url 'exams:exam_list' %}" class="nav-link active">▤ Examinations</a>
+        <a href="{% url 'accounts:student_list' %}" class="nav-link">♙ Students</a>
+        <a href="{% url 'results:admin_result_list' %}" class="nav-link">▣ Results</a>
+    </aside>
+    <main class="main-content">
+        <header class="topbar"><div><span class="eyebrow">QUESTION MANAGEMENT</span><h1>{% if question %}Edit question{% else %}Add a question{% endif %}</h1></div></header>
+        <section class="question-intro"><p class="eyebrow">EXAMINATION</p><h2>{{ exam.title }}</h2><p class="muted">Enter the question and all four answer options. Select the correct option for evaluation.</p></section>
+        <section class="section-block">
+            <form class="question-form" method="post">
+                {% csrf_token %}
+                {% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors }}</div>{% endif %}
+                {% for field in form %}
+                    <div class="form-field">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}<small class="field-help">{{ field.help_text }}</small>{% endif %}
+                        {% for error in field.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+                    </div>
+                {% endfor %}
+                <div class="form-note"><span>ⓘ</span><p>Questions use four options (A–D). Students can change their selection until they submit the examination or the timer expires.</p></div>
+                <div class="form-actions">
+                    <a class="secondary-button" href="{% url 'questions:question_list' exam.id %}">Cancel</a>
+                    <button class="header-button" type="submit">{% if question %}Save changes{% else %}Create question{% endif %} →</button>
+                </div>
+            </form>
+        </section>
+        <footer class="page-footer">Online Examination Portal <span>·</span> Question Management</footer>
+    </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,73 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Examination Result | OEP</title>
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'css/results.css' %}">
+</head>
+<body>
+<div class="app-shell">
+    <aside class="sidebar">
+        <a href="{% url 'exams:student_dashboard' %}" class="brand">
+            <span class="brand-icon">O</span>
+            <span>Exam<span class="brand-light">Portal</span></span>
+        </a>
+        <div class="sidebar-label">STUDENT MENU</div>
+        <a href="{% url 'exams:student_dashboard' %}" class="nav-link">▦ Dashboard</a>
+        <a href="{% url 'results:result_list' %}" class="nav-link active">▤ My results</a>
+        <div class="sidebar-footer">
+            <div class="user-avatar">{{ request.user.username|first|upper }}</div>
+            <div class="user-details"><strong>{{ request.user.first_name|default:request.user.username }}</strong><small>{% if request.user.is_staff %}Administrator{% else %}Student{% endif %}</small></div>
+            <form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}<button type="submit" class="logout-button" title="Log out">↗</button></form>
+        </div>
+    </aside>
+    <main class="main-content">
+        <header class="topbar">
+            <div><span class="eyebrow">EXAMINATION OUTCOME</span><h1>Result details</h1></div>
+            <a class="text-link" href="{% if request.user.is_staff %}{% url 'results:admin_result_list' %}{% else %}{% url 'results:result_list' %}{% endif %}">← Back to results</a>
+        </header>
+        <section class="result-hero">
+            <p class="eyebrow">FINAL RESULT</p>
+            <h2>{{ exam_title }}</h2>
+            <p class="muted">{% if completed_at %}Submitted {{ completed_at|date:"d F Y, H:i" }}{% else %}Your examination has been evaluated{% endif %}</p>
+            {% if passed == True or passed == "Pass" or passed == "PASS" %}
+                <span class="result-status passed result-hero-status">PASS</span>
+            {% elif passed == False or passed == "Fail" or passed == "FAIL" %}
+                <span class="result-status failed result-hero-status">NOT PASSED</span>
+            {% else %}
+                <span class="result-status pending result-hero-status">EVALUATED</span>
+            {% endif %}
+        </section>
+        <section class="result-summary-grid">
+            <article class="result-summary-card score-summary">
+                <span class="summary-label">YOUR SCORE</span>
+                <strong>{% if score != None %}{{ score }}{% else %}—{% endif %}</strong>
+                <small>{% if total_marks != None %}out of {{ total_marks }} marks{% else %}Marks awarded{% endif %}</small>
+            </article>
+            <article class="result-summary-card">
+                <span class="summary-label">PERCENTAGE</span>
+                <strong>{% if percentage != None %}{{ percentage|floatformat:2 }}%{% else %}—{% endif %}</strong>
+                <small>Overall performance</small>
+            </article>
+            <article class="result-summary-card">
+                <span class="summary-label">OUTCOME</span>
+                <strong class="outcome-text">{% if passed == True or passed == "Pass" or passed == "PASS" %}Passed{% elif passed == False or passed == "Fail" or passed == "FAIL" %}Not passed{% else %}Evaluated{% endif %}</strong>
+                <small>Based on the exam pass criteria</small>
+            </article>
+        </section>
+        <section class="result-note">
+            <span>✓</span>
+            <div><strong>Result recorded</strong><p>This page shows the evaluation saved for your submitted examination. If you have questions about the result, contact your examination administrator.</p></div>
+        </section>
+        <div class="result-actions">
+            <a class="secondary-button" href="{% if request.user.is_staff %}{% url 'results:admin_result_list' %}{% else %}{% url 'results:result_list' %}{% endif %}">Back to results</a>
+            <button class="header-button" type="button" onclick="window.print()">Print result</button>
+        </div>
+        <footer class="page-footer">Online Examination Portal <span>·</span> Result details</footer>
+    </main>
+</div>
+</body>
+</html>

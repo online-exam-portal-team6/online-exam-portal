@@ -1,4 +1,5 @@
 """Exam-taking views. Owner: Bhumika."""
+
 import json
 import math
 
@@ -14,9 +15,9 @@ from accounts.decorators import student_required
 from exams.models import Exam
 from questions.models import Question
 
-from .models import Attempt
-from .services import save_answer as save_attempt_answer
-from .services import start_attempt, submit_attempt
+from .models import Attempt, AttemptAnswer
+from .services import save_answer as save_answer_service
+from .services import start_attempt, submit_attempt as submit_attempt_service
 
 
 @student_required
@@ -29,32 +30,49 @@ def exam_start(request, exam_id):
             messages.error(request, " ".join(exc.messages))
         else:
             return redirect("attempts:exam_take", attempt_id=attempt.pk)
+
     now = timezone.now()
     is_available = exam.is_active and exam.start_time <= now <= exam.end_time
-    return render(request, "attempts/exam_start.html", {"exam": exam, "is_available": is_available})
+    return render(
+        request,
+        "attempts/exam_start.html",
+        {"exam": exam, "is_available": is_available},
+    )
 
 
 @student_required
 def exam_take(request, attempt_id):
-    attempt = get_object_or_404(Attempt.objects.select_related("exam"), pk=attempt_id, student=request.user)
+    attempt = get_object_or_404(
+        Attempt.objects.select_related("exam"),
+        pk=attempt_id,
+        student=request.user,
+    )
     if attempt.status != Attempt.Status.IN_PROGRESS:
-        return redirect("attempts:exam_result", attempt_id=attempt.pk)
-    remaining_seconds = max(0, math.ceil((attempt.deadline_at - timezone.now()).total_seconds()))
-    if remaining_seconds <= 0:
-        attempt = submit_attempt(attempt, auto=True)
-        messages.info(request, "Time expired. Your examination was submitted automatically.")
-        return redirect("attempts:exam_result", attempt_id=attempt.pk)
-    questions = list(Question.objects.filter(exam=attempt.exam).order_by("id"))
-    saved_answers = dict(attempt.answers.values_list("question_id", "selected_option"))
+        messages.info(request, "This examination attempt has already been submitted.")
+        return redirect("exams:student_dashboard")
+
+    remaining_seconds = max(
+        0,
+        math.ceil((attempt.deadline_at - timezone.now()).total_seconds()),
+    )
+    questions = Question.objects.filter(exam=attempt.exam).order_by("id")
+    saved_answers = dict(
+        AttemptAnswer.objects.filter(attempt=attempt).values_list(
+            "question_id",
+            "selected_option",
+        )
+    )
     for question in questions:
         question.selected_option = saved_answers.get(question.pk)
     context = {
-        "attempt": attempt, "exam": attempt.exam, "questions": questions,
-        "saved_answers": saved_answers, "remaining_seconds": remaining_seconds,
+        "attempt": attempt,
+        "exam": attempt.exam,
+        "questions": questions,
+        "saved_answers": saved_answers,
+        "remaining_seconds": remaining_seconds,
         "answer_url": reverse("attempts:save_answer", args=[attempt.pk]),
         "submit_url": reverse("attempts:exam_submit", args=[attempt.pk]),
-        "auto_submit_url": reverse("attempts:exam_auto_submit", args=[attempt.pk]),
-        "is_expired": False,
+        "is_expired": remaining_seconds <= 0,
     }
     return render(request, "attempts/exam_take.html", context)
 
@@ -62,68 +80,77 @@ def exam_take(request, attempt_id):
 @student_required
 @require_POST
 def save_answer(request, attempt_id):
-    attempt = get_object_or_404(Attempt, pk=attempt_id, student=request.user)
+    """JSON endpoint to save or change one selected MCQ option."""
+    attempt = get_object_or_404(
+        Attempt.objects.select_related("exam"),
+        pk=attempt_id,
+        student=request.user,
+    )
+    if attempt.status != Attempt.Status.IN_PROGRESS:
+        return JsonResponse(
+            {"ok": False, "error": "This examination has already been submitted."},
+            status=403,
+        )
+    if attempt.deadline_at <= timezone.now():
+        return JsonResponse({"ok": False, "expired": True}, status=403)
+
     try:
-        payload = json.loads(request.body or b"{}")
-        if not isinstance(payload, dict):
-            raise ValidationError("The request body must be a JSON object.")
-        question_id = payload.get("question_id")
-        option = payload.get("option")
-        if isinstance(question_id, bool) or not isinstance(question_id, int):
-            raise ValidationError("A valid question_id is required.")
-        if not isinstance(option, str):
-            raise ValidationError("A selected option is required.")
-        answer, remaining_seconds = save_attempt_answer(attempt, question_id, option)
-    except (json.JSONDecodeError, UnicodeDecodeError):
-        return JsonResponse({"ok": False, "error": "Invalid JSON request."}, status=400)
+        payload = json.loads(request.body.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        return JsonResponse({"ok": False, "error": "A valid JSON body is required."}, status=400)
+
+    if not isinstance(payload, dict):
+        return JsonResponse({"ok": False, "error": "A JSON object is required."}, status=400)
+
+    question_id = payload.get("question_id")
+    option = payload.get("option")
+    if isinstance(question_id, bool) or not isinstance(question_id, int):
+        return JsonResponse({"ok": False, "error": "question_id must be an integer."}, status=400)
+    if not isinstance(option, str):
+        return JsonResponse({"ok": False, "error": "option must be A, B, C or D."}, status=400)
+
+    try:
+        answer = save_answer_service(attempt, question_id, option)
     except ValidationError as exc:
-        return JsonResponse({"ok": False, "error": " ".join(exc.messages)}, status=400)
-    return JsonResponse({"ok": True, "question_id": answer.question_id,
-                         "option": answer.selected_option, "remaining_seconds": remaining_seconds})
+        if attempt.deadline_at <= timezone.now():
+            return JsonResponse({"ok": False, "expired": True}, status=403)
+        return JsonResponse(
+            {"ok": False, "error": " ".join(exc.messages)},
+            status=400,
+        )
+
+    remaining_seconds = max(
+        0,
+        math.ceil((attempt.deadline_at - timezone.now()).total_seconds()),
+    )
+    return JsonResponse(
+        {
+            "ok": True,
+            "question_id": answer.question_id,
+            "option": answer.selected_option,
+            "remaining_seconds": remaining_seconds,
+        }
+    )
 
 
 @student_required
 @require_POST
 def exam_submit(request, attempt_id):
-    attempt = get_object_or_404(Attempt, pk=attempt_id, student=request.user)
-    try:
-        attempt = submit_attempt(attempt)
-    except ValidationError as exc:
-        messages.error(request, " ".join(exc.messages))
-        return redirect("attempts:exam_take", attempt_id=attempt.pk)
-    messages.success(request, "Your examination has been submitted successfully.")
-    return redirect("attempts:exam_result", attempt_id=attempt.pk)
-
-
-@student_required
-@require_POST
-def exam_auto_submit(request, attempt_id):
-    attempt = get_object_or_404(Attempt, pk=attempt_id, student=request.user)
-    try:
-        attempt = submit_attempt(attempt, auto=True)
-    except ValidationError as exc:
-        return JsonResponse({"ok": False, "error": " ".join(exc.messages)}, status=400)
-    return JsonResponse({
-        "ok": True,
-        "status": attempt.status,
-        "result_url": reverse("attempts:exam_result", args=[attempt.pk]),
-    })
-
-
-@student_required
-def exam_result(request, attempt_id):
+    """Submit the current attempt manually or automatically after its deadline."""
     attempt = get_object_or_404(
         Attempt.objects.select_related("exam"),
         pk=attempt_id,
         student=request.user,
     )
     if attempt.status == Attempt.Status.IN_PROGRESS:
-        return redirect("attempts:exam_take", attempt_id=attempt.pk)
-    percentage = (
-        round(attempt.score * 100 / attempt.total_questions, 2)
-        if attempt.total_questions else 0
-    )
-    return render(request, "attempts/exam_result.html", {
-        "attempt": attempt,
-        "percentage": percentage,
-    })
+        auto = attempt.deadline_at <= timezone.now()
+        attempt = submit_attempt_service(attempt, auto=auto)
+        if attempt.status == Attempt.Status.AUTO_SUBMITTED:
+            messages.info(request, "Your time expired. Your answers have been submitted automatically.")
+        else:
+            messages.success(request, "Your examination has been submitted successfully.")
+        messages.info(
+            request,
+            "Your result will appear after the evaluation service has processed your submission.",
+        )
+    return redirect("results:result_detail", attempt_id=attempt.pk)
