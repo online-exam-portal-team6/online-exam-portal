@@ -2,7 +2,7 @@
 
 This diagram is derived from the current Django model definitions in contract B5's application skeleton. It documents only fields that exist in the inspected models. results/models.py is currently a placeholder, so no Result class or invented result fields are shown.
 
-\`\`\`mermaid
+```mermaid
 classDiagram
   class User {
     <<Django AUTH_USER_MODEL>>
@@ -57,7 +57,7 @@ classDiagram
   Exam "1" --> "0..*" Attempt : attempts
   Attempt "1" --> "0..*" AttemptAnswer : answers
   Question "1" --> "0..*" AttemptAnswer : selected for
-\`\`\`
+```
 
 ## Model constraints and behaviour
 
