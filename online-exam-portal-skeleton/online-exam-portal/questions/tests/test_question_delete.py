@@ -51,7 +51,7 @@ class QuestionDeleteTests(TestCase):
         self.assertTemplateUsed(
             response, "questions/question_confirm_delete.html"
         )
-        self.assertContains(response, "Confirm delete")
+        self.assertContains(response, "Yes, delete question")
         self.assertTrue(Question.objects.filter(pk=self.question.pk).exists())
 
     def test_TC_QUES_03_post_confirmation_deletes_question(self):

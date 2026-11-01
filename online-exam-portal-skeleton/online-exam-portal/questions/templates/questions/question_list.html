@@ -1,135 +1,69 @@
-
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Questions - {{ exam.title }}</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f6fa;
-            margin: 0;
-            padding: 35px;
-            color: #1f2937;
-        }
-
-        .container {
-            max-width: 1000px;
-            margin: auto;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            gap: 15px;
-        }
-
-        .question {
-            background: white;
-            padding: 22px;
-            margin-bottom: 18px;
-            border-radius: 10px;
-            border: 1px solid #e5e7eb;
-        }
-
-        .option {
-            padding: 9px 12px;
-            margin: 7px 0;
-            background: #f3f4f6;
-            border-radius: 6px;
-        }
-
-        .correct {
-            background: #dcfce7;
-            color: #166534;
-        }
-
-        .button {
-            display: inline-block;
-            padding: 11px 17px;
-            background: #2563eb;
-            color: white;
-            text-decoration: none;
-            border-radius: 7px;
-        }
-
-        .question-actions {
-            margin-top: 14px;
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .button-danger {
-            background: #b91c1c;
-        }
-
-        .empty {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            text-align: center;
-        }
-    </style>
+    <title>Question Bank | Exam Portal</title>
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'css/questions.css' %}">
 </head>
 <body>
-<div class="container">
-
-    <div class="header">
-        <div>
-            <h1>{{ exam.title }}</h1>
-            <p>Manage examination questions</p>
+<div class="app-shell">
+    <aside class="sidebar">
+        <a href="{% url 'exams:admin_dashboard' %}" class="brand"><span class="brand-icon">O</span><span>Exam<span class="brand-light">Portal</span></span></a>
+        <div class="sidebar-label">ADMINISTRATION</div>
+        <a href="{% url 'exams:admin_dashboard' %}" class="nav-link">▦ Dashboard</a>
+        <a href="{% url 'exams:exam_list' %}" class="nav-link active">▤ Examinations</a>
+        <a href="{% url 'accounts:student_list' %}" class="nav-link">♙ Students</a>
+        <a href="{% url 'results:admin_result_list' %}" class="nav-link">▣ Results</a>
+        <div class="sidebar-footer">
+            <div class="user-avatar">{{ request.user.username|first|upper }}</div>
+            <div class="user-details"><strong>{{ request.user.first_name|default:request.user.username }}</strong><small>Administrator</small></div>
+            <form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}<button type="submit" class="logout-button" title="Log out">↗</button></form>
         </div>
-
-        <a class="button"
-           href="{% url 'questions:question_create' exam.id %}">
-            + Add Question
-        </a>
-    </div>
-
-    <h2>Questions ({{ questions|length }})</h2>
-
-    {% for question in questions %}
-        <div class="question">
-            <h3>{{ forloop.counter }}. {{ question.text }}</h3>
-
-            <div class="option {% if question.correct_option == 'A' %}correct{% endif %}">
-                A. {{ question.option_a }}
-            </div>
-
-            <div class="option {% if question.correct_option == 'B' %}correct{% endif %}">
-                B. {{ question.option_b }}
-            </div>
-
-            <div class="option {% if question.correct_option == 'C' %}correct{% endif %}">
-                C. {{ question.option_c }}
-            </div>
-
-            <div class="option {% if question.correct_option == 'D' %}correct{% endif %}">
-                D. {{ question.option_d }}
-            </div>
-
-            <div class="question-actions">
-                <a class="button"
-                   href="{% url 'questions:question_edit' exam.id question.id %}">
-                    Edit question
-                </a>
-                <a class="button button-danger"
-                   href="{% url 'questions:question_delete' exam.id question.id %}">
-                    Delete question
-                </a>
-            </div>
-        </div>
-    {% empty %}
-        <div class="empty">
-            <h3>No questions added yet</h3>
-            <p>Start by adding your first MCQ question.</p>
-        </div>
-    {% endfor %}
-
+    </aside>
+    <main class="main-content">
+        <header class="topbar">
+            <div><span class="eyebrow">QUESTION MANAGEMENT</span><h1>Question bank</h1></div>
+            <a class="header-button" href="{% url 'questions:question_create' exam.id %}">＋ Add question</a>
+        </header>
+        <section class="question-intro">
+            <p class="eyebrow">EXAMINATION</p>
+            <h2>{{ exam.title }}</h2>
+            <p class="muted">Manage the four-option multiple-choice questions included in this examination.</p>
+        </section>
+        <section class="section-block">
+            <div class="section-heading"><div><p class="eyebrow">QUESTION SET</p><h2>Questions</h2></div><span class="count-pill">{{ questions|length }} questions</span></div>
+            {% if questions %}
+                <div class="question-list">
+                    {% for question in questions %}
+                        <article class="question-admin-card">
+                            <div class="question-admin-heading">
+                                <span class="question-index">QUESTION {{ forloop.counter }}</span>
+                                <span class="question-answer-key">Correct option: {{ question.correct_option }}</span>
+                            </div>
+                            <h3>{{ question.text }}</h3>
+                            <div class="question-options">
+                                <span {% if question.correct_option == "A" %}class="correct-option"{% endif %}>A. {{ question.option_a }}</span>
+                                <span {% if question.correct_option == "B" %}class="correct-option"{% endif %}>B. {{ question.option_b }}</span>
+                                <span {% if question.correct_option == "C" %}class="correct-option"{% endif %}>C. {{ question.option_c }}</span>
+                                <span {% if question.correct_option == "D" %}class="correct-option"{% endif %}>D. {{ question.option_d }}</span>
+                            </div>
+                            <div class="question-actions">
+                                <a class="secondary-button" href="{% url 'questions:question_edit' exam.id question.id %}">Edit question</a>
+                                <a class="danger-link" href="{% url 'questions:question_delete' exam.id question.id %}">Delete</a>
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state"><div class="empty-icon">?</div><h3>No questions added yet</h3><p>Add the first question to make this examination ready for students.</p><a class="empty-action" href="{% url 'questions:question_create' exam.id %}">Add first question</a></div>
+            {% endif %}
+            <a class="text-link" href="{% url 'exams:exam_list' %}">← Back to examinations</a>
+        </section>
+        <footer class="page-footer">Online Examination Portal <span>·</span> Question Management</footer>
+    </main>
 </div>
 </body>
 </html>
