@@ -2,7 +2,7 @@
 
 Logical component view of the modular Django monolith. The boxes are Django apps, not separately deployed services.
 
-\`\`\`mermaid
+```mermaid
 flowchart TB
   Browser[Student / Admin Browser]
   subgraph Django[Django Web Application]
@@ -32,7 +32,7 @@ flowchart TB
   Results -->|Result repository| DB
   Attempts -->|evaluate submitted attempt| Results
   Attempts -->|read exam questions| Questions
-\`\`\`
+```
 
 ## Provided and required interfaces
 
