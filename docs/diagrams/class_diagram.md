@@ -2,7 +2,7 @@
 
 This diagram reflects the models present in the exam-attempt integration branch. It deliberately does not invent a Result schema: results/models.py is still a placeholder in the inspected source.
 
-\`\`\`mermaid
+```mermaid
 classDiagram
   class User {
     <<Django auth user>>
@@ -51,7 +51,7 @@ classDiagram
   Exam "1" --> "0..*" Attempt : attempts
   Attempt "1" --> "0..*" AttemptAnswer : answers
   Question "1" --> "0..*" AttemptAnswer : selected for
-\`\`\`
+```
 
 ## Constraints
 
