@@ -112,10 +112,14 @@
                                 </div>
                             </div>
 
-                            <div class="exam-management-actions">
+                            <div style="display:grid;gap:8px;">
                                 <a href="{% url 'exams:exam_edit' exam.pk %}"
                                    class="primary-button">
                                     Edit examination <span>→</span>
+                                </a>
+                                <a href="{% url 'questions:question_list' exam.pk %}"
+                                   class="secondary-button">
+                                    Manage questions
                                 </a>
                                 <form method="post"
                                       action="{% url 'exams:exam_toggle' exam.pk %}">
