@@ -21,11 +21,10 @@
     <header class="exam-toolbar"><div><p class="eyebrow">EXAMINATION IN PROGRESS</p><h1>{{ exam.title }}</h1></div><span>{{ questions|length }} QUESTIONS</span></header>
     <section class="timer-panel" aria-live="polite"><div><p class="eyebrow">TIME REMAINING</p><p>Answers save when selected.</p></div><strong class="timer-value" id="exam-timer" data-remaining="{{ remaining_seconds }}">--:--</strong></section>
     <p id="save-status" class="save-status" role="status" aria-live="polite">Your answers will be saved automatically.</p>
-    {% if is_expired %}<p role="alert">The examination deadline has passed. Answers are locked.</p>{% endif %}
     {% for question in questions %}
         <article class="question-card" data-question-id="{{ question.id }}"><p class="eyebrow">QUESTION {{ forloop.counter }}</p><h2>{{ question.text }}</h2>
         {% for key, option_text in question.options %}
-            <label class="option-label"><input type="radio" name="question_{{ question.id }}" value="{{ key }}" {% if question.selected_option == key %}checked{% endif %} {% if is_expired %}disabled{% endif %}><span><strong>{{ key }}.</strong> {{ option_text }}</span></label>
+            <label class="option-label"><input type="radio" name="question_{{ question.id }}" value="{{ key }}" {% if question.selected_option == key %}checked{% endif %}><span><strong>{{ key }}.</strong> {{ option_text }}</span></label>
         {% endfor %}</article>
     {% empty %}<p>No questions have been added yet.</p>{% endfor %}
     <form class="submit-panel" method="post" action="{{ submit_url }}" onsubmit="return confirm('Are you sure you want to submit? You cannot change your answers afterwards.');">
@@ -36,14 +35,30 @@
 <script>
 (function(){
     const timer=document.getElementById("exam-timer"),status=document.getElementById("save-status");
-    const answerUrl="{{ answer_url|escapejs }}",csrf="{{ csrf_token }}";
-    let remaining=Math.max(0,Number(timer.dataset.remaining||0));
+    const answerUrl="{{ answer_url|escapejs }}",autoSubmitUrl="{{ auto_submit_url|escapejs }}",csrf="{{ csrf_token }}";
+    let remaining=Math.max(0,Number(timer.dataset.remaining||0)),submitting=false;
+    async function autoSubmit(){
+        if(submitting)return;submitting=true;
+        document.querySelectorAll(".question-card input,.submit-button").forEach(el=>el.disabled=true);
+        status.textContent="Time is up. Submitting your examination…";
+        try{
+            const response=await fetch(autoSubmitUrl,{method:"POST",headers:{"X-CSRFToken":csrf,"Content-Type":"application/json"},body:"{}"});
+            const result=await response.json();
+            if(!response.ok||!result.ok)throw new Error(result.error||"Automatic submission failed.");
+            window.location.assign(result.result_url);
+        }catch(error){
+            submitting=false;status.classList.add("error");
+            status.textContent="Submission could not be confirmed. Please keep this page open and retry.";
+            window.setTimeout(autoSubmit,3000);
+        }
+    }
     function tick(){
         timer.textContent=String(Math.floor(remaining/60)).padStart(2,"0")+":"+String(remaining%60).padStart(2,"0");
-        if(remaining<=0){document.querySelectorAll(".question-card input").forEach(el=>el.disabled=true);status.textContent="Time expired. Answers are locked.";return;}
+        if(remaining<=0){autoSubmit();return;}
         remaining--;window.setTimeout(tick,1000);
     } tick();
     document.querySelectorAll(".question-card input[type=radio]").forEach(input=>input.addEventListener("change",async()=>{
+        if(submitting)return;
         const card=input.closest("[data-question-id]");status.classList.remove("error");status.textContent="Saving answer…";
         try{
             const response=await fetch(answerUrl,{method:"POST",headers:{"Content-Type":"application/json","X-CSRFToken":csrf},
