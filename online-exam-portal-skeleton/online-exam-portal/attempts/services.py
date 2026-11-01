@@ -3,6 +3,7 @@ from datetime import timedelta
 
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
+from django.db.models import F
 from django.utils import timezone
 
 from exams.models import Exam
@@ -63,5 +64,33 @@ def save_answer(attempt, question_id, option):
 
 
 def submit_attempt(attempt, auto=False):
-    """Submission is implemented in OEP-F-018/019."""
-    raise NotImplementedError("TODO (Bhumika, OEP-F-018/019)")
+    """Grade and finalize an attempt manually or when its deadline expires."""
+    with transaction.atomic():
+        locked_attempt = (
+            Attempt.objects.select_for_update()
+            .select_related("exam")
+            .get(pk=attempt.pk)
+        )
+        if locked_attempt.status != Attempt.Status.IN_PROGRESS:
+            return locked_attempt
+        now = timezone.now()
+        if auto and now < locked_attempt.deadline_at:
+            raise ValidationError("The examination deadline has not been reached.")
+        if not auto and now >= locked_attempt.deadline_at:
+            raise ValidationError("The examination time has expired.")
+        total_questions = Question.objects.filter(exam_id=locked_attempt.exam_id).count()
+        correct_count = Answer.objects.filter(
+            attempt=locked_attempt,
+            question__exam_id=locked_attempt.exam_id,
+            selected_option=F("question__correct_option"),
+        ).count()
+        locked_attempt.score = correct_count
+        locked_attempt.total_questions = total_questions
+        locked_attempt.status = (
+            Attempt.Status.AUTO_SUBMITTED if auto else Attempt.Status.SUBMITTED
+        )
+        locked_attempt.submitted_at = now
+        locked_attempt.save(update_fields=[
+            "score", "total_questions", "status", "submitted_at"
+        ])
+        return locked_attempt

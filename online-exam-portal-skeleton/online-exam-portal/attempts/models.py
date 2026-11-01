@@ -15,6 +15,8 @@ class Attempt(models.Model):
     deadline_at = models.DateTimeField()
     submitted_at = models.DateTimeField(null=True, blank=True)
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.IN_PROGRESS)
+    score = models.PositiveIntegerField(null=True, blank=True)
+    total_questions = models.PositiveIntegerField(null=True, blank=True)
 
     class Meta:
         ordering = ["-started_at"]
