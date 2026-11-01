@@ -58,7 +58,7 @@ class QuestionEditTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "questions/question_form.html")
         self.assertEqual(response.context["form"].instance, self.question)
-        self.assertContains(response, "Edit MCQ Question")
+        self.assertContains(response, "Edit question")
 
     def test_TC_QUES_02_admin_can_update_question(self):
         self.client.force_login(self.admin)
