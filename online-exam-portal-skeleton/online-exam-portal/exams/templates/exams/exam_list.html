@@ -6,6 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Examinations | OEP</title>
     <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <style>
+        .exam-toggle-button {
+            background: transparent;
+            cursor: pointer;
+            font-family: inherit;
+        }
+    </style>
 </head>
 <body>
 <div class="app-shell">
@@ -105,10 +112,21 @@
                                 </div>
                             </div>
 
-                            <a href="{% url 'exams:exam_edit' exam.pk %}"
-                               class="primary-button">
-                                Edit examination <span>→</span>
-                            </a>
+                            <div class="exam-management-actions">
+                                <a href="{% url 'exams:exam_edit' exam.pk %}"
+                                   class="primary-button">
+                                    Edit examination <span>→</span>
+                                </a>
+                                <form method="post"
+                                      action="{% url 'exams:exam_toggle' exam.pk %}">
+                                    {% csrf_token %}
+                                    <button type="submit"
+                                            class="secondary-button exam-toggle-button">
+                                        {% if exam.is_active %}Deactivate{% else %}Activate{% endif %}
+                                        examination
+                                    </button>
+                                </form>
+                            </div>
                         </article>
                     {% endfor %}
                 </div>
