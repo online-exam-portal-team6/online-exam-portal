@@ -2,7 +2,7 @@
 
 Source: SRS section 7.1, functional requirements OEP-F-001 to OEP-F-024 and the SRS v1.1 revision note.
 
-\`\`\`mermaid
+```mermaid
 flowchart LR
   Student([Student])
   Admin([Administrator])
@@ -40,7 +40,7 @@ flowchart LR
   Take --> Save
   Take --> Submit
   Submit --> Result
-\`\`\`
+```
 
 ## Actors and scope
 
