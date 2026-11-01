@@ -1,0 +1,96 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Results | OEP</title>
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'css/results.css' %}">
+</head>
+<body>
+<div class="app-shell">
+    <aside class="sidebar">
+        <a href="{% url 'exams:student_dashboard' %}" class="brand">
+            <span class="brand-icon">O</span>
+            <span>Exam<span class="brand-light">Portal</span></span>
+        </a>
+        <div class="sidebar-label">STUDENT MENU</div>
+        <a href="{% url 'exams:student_dashboard' %}" class="nav-link">▦ Dashboard</a>
+        <a href="{% url 'results:result_list' %}" class="nav-link active">▤ My results</a>
+        <div class="sidebar-footer">
+            <div class="user-avatar">{{ request.user.username|first|upper }}</div>
+            <div class="user-details">
+                <strong>{{ request.user.first_name|default:request.user.username }}</strong>
+                <small>Student</small>
+            </div>
+            <form method="post" action="{% url 'accounts:logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="logout-button" title="Log out">↗</button>
+            </form>
+        </div>
+    </aside>
+    <main class="main-content">
+        <header class="topbar">
+            <div>
+                <span class="eyebrow">STUDENT WORKSPACE</span>
+                <h1>My results</h1>
+            </div>
+            <div class="topbar-right"><span class="status-dot"></span>Private to your account</div>
+        </header>
+        <section class="welcome-section">
+            <div>
+                <p class="eyebrow">YOUR PERFORMANCE</p>
+                <h2>Every result, in one place.</h2>
+                <p class="muted">Review scores and outcomes from examinations you have submitted.</p>
+            </div>
+            <div class="welcome-decoration">✦</div>
+        </section>
+        <section class="section-block">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">RESULT HISTORY</p>
+                    <h2>Completed examinations</h2>
+                </div>
+                <span class="count-pill">{{ results|length }} results</span>
+            </div>
+            {% if results %}
+                <div class="results-grid">
+                    {% for item in results %}
+                        <article class="result-card">
+                            <div class="result-card-top">
+                                <span class="exam-tag">COMPLETED</span>
+                                {% if item.passed == True or item.passed == "Pass" or item.passed == "PASS" %}
+                                    <span class="result-status passed">Passed</span>
+                                {% elif item.passed == False or item.passed == "Fail" or item.passed == "FAIL" %}
+                                    <span class="result-status failed">Not passed</span>
+                                {% else %}
+                                    <span class="result-status pending">Evaluated</span>
+                                {% endif %}
+                            </div>
+                            <h3>{{ item.exam_title }}</h3>
+                            <p class="result-date">
+                                {% if item.completed_at %}Submitted {{ item.completed_at|date:"d M Y, H:i" }}{% else %}Submission recorded{% endif %}
+                            </p>
+                            <div class="result-metrics">
+                                <div><span>Score</span><strong>{% if item.score != None %}{{ item.score }}{% else %}—{% endif %}{% if item.total_marks != None %} / {{ item.total_marks }}{% endif %}</strong></div>
+                                <div><span>Percentage</span><strong>{% if item.percentage != None %}{{ item.percentage|floatformat:2 }}%{% else %}—{% endif %}</strong></div>
+                            </div>
+                            <a class="primary-button" href="{% url 'results:result_detail' item.attempt_id %}">View result <span>→</span></a>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">▤</div>
+                    <h3>No results available yet</h3>
+                    <p>After you submit an examination and it has been evaluated, your score and result will appear here.</p>
+                    <a class="empty-action" href="{% url 'exams:student_dashboard' %}">Back to dashboard</a>
+                </div>
+            {% endif %}
+        </section>
+        <footer class="page-footer">Online Examination Portal <span>·</span> My Results</footer>
+    </main>
+</div>
+</body>
+</html>
