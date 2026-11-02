@@ -1,5 +1,5 @@
 """Tests for deadline-based automatic submission (OEP-F-019)."""
-
+from questions.models import Question
 from datetime import timedelta
 
 from django.contrib.auth.models import User
@@ -31,6 +31,15 @@ class AutoSubmitTests(TestCase):
             start_time=now - timedelta(minutes=5),
             end_time=now + timedelta(hours=1),
             created_by=self.admin,
+        )
+        Question.objects.create(
+            exam=self.exam,
+            text="Test question",
+            option_a="Option A",
+            option_b="Option B",
+            option_c="Option C",
+            option_d="Option D",
+            correct_option=Question.Option.A,
         )
         self.attempt = Attempt.objects.create(
             student=self.student,

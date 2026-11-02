@@ -10,6 +10,7 @@ from django.utils import timezone
 from attempts.models import Attempt
 from attempts.services import submit_attempt
 from exams.models import Exam
+from questions.models import Question
 
 
 class SubmitAttemptTests(TestCase):
@@ -31,6 +32,15 @@ class SubmitAttemptTests(TestCase):
             start_time=now - timedelta(minutes=5),
             end_time=now + timedelta(hours=1),
             created_by=self.admin,
+        )
+        Question.objects.create(
+            exam=self.exam,
+            text="Test question",
+            option_a="Option A",
+            option_b="Option B",
+            option_c="Option C",
+            option_d="Option D",
+            correct_option=Question.Option.A,
         )
         self.attempt = Attempt.objects.create(
             student=self.student,
