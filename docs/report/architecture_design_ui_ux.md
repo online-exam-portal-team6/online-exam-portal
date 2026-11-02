@@ -18,7 +18,12 @@ Current exam-taking entities are Exam, Question, Attempt and AttemptAnswer. Exam
 The UI uses a shared dark visual system, side navigation, cards, tables, status labels and responsive layouts. Student journeys prioritise available exams, start instructions, remaining time, answer-save feedback and submit action. Administrator journeys prioritise exam, question and student management. Result pages put score, percentage and pass/fail status first; status text accompanies colour.
 
 ## Security and usability
-Django sessions and password hashing protect authentication. CSRF middleware protects state-changing requests. Role guards and ownership filters protect student data. Answer and submit operations validate the server deadline. The usability review applies Nielsen heuristics; source CSS contains responsive breakpoints, but rendered screenshots and live browser verification must still be attached.
+Django sessions and password hashing protect authentication. CSRF middleware protects state-changing requests. Role guards and ownership filters protect student data. Answer and submit operations validate the server deadline. The shared 403 handler now has a designed access-denied template in the pending OEP-42/51/71 change set. The detailed controls, production configuration warnings and remaining hardening actions are documented in [Security Architecture](../security_architecture.md).
+
+The UI applies a shared dark visual system, responsive navigation and card layouts. The usability review records observations from the supplied rendered captures and source inspection in [Usability Review](../usability_review.md). The eight screenshot binaries are not yet repository-hosted, so this report does not claim that evidence is attached.
+
+## Design patterns
+The implementation uses Django Model–Template–View, a service layer for attempt lifecycle operations, role decorators, ORM constraints and transactions, Post/Redirect/Get, and idempotent start/save/submit operations. See [Design Patterns](../design_patterns.md) for the pattern-to-code mapping.
 
 ## Verification and limitations
-GitHub Actions checks Flake8, Django system checks, migration consistency and Django tests. Feature tests use SRS test IDs. Remaining integration dependencies include the approved result persistence/evaluation service and live desktop/mobile screenshot evidence.
+GitHub Actions runs the repository's Django checks, tests and lint workflow on pull requests. Feature tests use SRS test IDs. The main remaining integration dependency is final confirmation of the result evaluation/persistence schema and its end-to-end behaviour. The report should be refreshed after the result-owner integration and Product Owner acceptance.

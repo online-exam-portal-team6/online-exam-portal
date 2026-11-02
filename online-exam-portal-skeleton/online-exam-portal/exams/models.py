@@ -15,6 +15,12 @@ class Exam(models.Model):
     start_time = models.DateTimeField(help_text="Students can start the exam from this time.")
     end_time = models.DateTimeField(help_text="Students cannot start the exam after this time.")
     is_active = models.BooleanField(default=True)
+    pass_percentage = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=50,
+        help_text="Minimum percentage required to pass.",
+    )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
@@ -37,6 +43,8 @@ class Exam(models.Model):
                 raise ValidationError(
                     {"duration_minutes": f"Duration must be between 1 and {MAX_DURATION_MINUTES} minutes."}
                 )
+        if self.pass_percentage is not None and not 0 <= self.pass_percentage <= 100:
+            raise ValidationError({"pass_percentage": "Pass percentage must be between 0 and 100."})
         if self.start_time and self.end_time:
             if self.end_time <= self.start_time:
                 raise ValidationError({"end_time": "End time must be after the start time."})

@@ -5,6 +5,13 @@ I used an AI assistant as a development support tool while working on the Online
 
 For result pages, assistance helped structure the student result history, individual result detail and administrator result list. For the exam workflow, it helped reason about JSON answer saving, changing selections, server-side deadlines, manual submission, automatic submission and idempotency.
 
+## Example experience from this project
+During the usability and integration review, I used AI assistance to organise a checklist for comparing the student dashboard, result-history screen and the expected attempt lifecycle. The review surfaced a mismatch in the supplied UI evidence: the student dashboard showed zero completed examinations, while the results page displayed one submitted examination. It also highlighted a result card labelled “Evaluated” even though its score and percentage were blank.
+
+Rather than accepting a generated explanation as fact, I treated these as review findings and checked them against the actual screenshots and project implementation context. I recorded them as issues requiring verification by the relevant backend and frontend owners. This helped me distinguish a visual inconsistency from a confirmed root cause and avoid changing shared result logic without understanding its ownership and data contract.
+
+A useful lesson from this experience was that AI is most valuable when it helps frame questions and organise evidence; the developer must still verify the evidence, trace the implementation and obtain peer review before treating a finding as resolved.
+
 ## My responsibility
 AI-generated suggestions are not proof that a feature works. I remain responsible for understanding the code, checking it against the approved team contract, reviewing changes, ensuring tests represent acceptance criteria, verifying behaviour and coordinating with owners of shared models and evaluation services.
 
@@ -19,6 +26,3 @@ AI can assume fields, routes or service behaviour that do not exist. Generated c
 
 ## What I learned
 The best use of AI is exploration, drafting and review while retaining engineering ownership of decisions. The final implementation must be explainable, tested, reviewed by teammates and accepted by the Product Owner.
-
-## Personal review before submission
-This is a draft based on the AI-assisted workflow used during the project. Before submitting it as my personal reflection, I should confirm that each example accurately describes my own work and add one concrete example of a suggestion I changed or rejected after checking the repository.
