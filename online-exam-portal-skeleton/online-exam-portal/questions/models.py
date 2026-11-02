@@ -1,3 +1,4 @@
+
 """MCQ questions belonging to an examination."""
 
 from django.core.exceptions import ValidationError
@@ -21,6 +22,7 @@ class Question(models.Model):
     option_b = models.CharField(max_length=500)
     option_c = models.CharField(max_length=500)
     option_d = models.CharField(max_length=500)
+
     correct_option = models.CharField(
         max_length=1,
         choices=Option.choices,
