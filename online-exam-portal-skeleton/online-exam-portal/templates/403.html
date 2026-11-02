@@ -1,0 +1,24 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Access denied | Exam Portal</title>
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+</head>
+<body>
+    <main class="main-content" style="max-width: 720px; margin: 10vh auto; padding: 2rem;">
+        <section class="empty-state" role="alert" aria-labelledby="forbidden-title">
+            <p class="eyebrow">403 · ACCESS RESTRICTED</p>
+            <h1 id="forbidden-title">You can’t access this page</h1>
+            <p>Your account does not have permission to view this resource. If you believe this is a mistake, contact your examination administrator.</p>
+            {% if request.user.is_authenticated %}
+                <a class="primary-button" href="{% url 'root' %}">Return to your dashboard</a>
+            {% else %}
+                <a class="primary-button" href="{% url 'accounts:login' %}">Sign in</a>
+            {% endif %}
+        </section>
+    </main>
+</body>
+</html>

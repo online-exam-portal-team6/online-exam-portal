@@ -1,0 +1,206 @@
+/* Result history, detail and administration pages */
+.results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    gap: 16px;
+}
+.result-card,
+.result-summary-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px;
+}
+.result-card {
+    transition: transform .2s, border-color .2s;
+}
+.result-card:hover {
+    transform: translateY(-3px);
+    border-color: #51466f;
+}
+.result-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+.result-card h3 {
+    margin: 21px 0 7px;
+    font: 700 17px 'Manrope', sans-serif;
+}
+.result-date {
+    color: var(--muted);
+    font-size: 11px;
+}
+.result-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 20px;
+    padding: 6px 10px;
+    font-size: 10px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.result-status.passed {
+    color: var(--green);
+    background: #203b31;
+}
+.result-status.failed {
+    color: #ff9999;
+    background: #422b30;
+}
+.result-status.pending {
+    color: #c1b8ff;
+    background: #302a49;
+}
+.result-metrics {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding: 17px 0;
+    margin: 18px 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+}
+.result-metrics div {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+.result-metrics span,
+.summary-label {
+    color: var(--muted);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .7px;
+}
+.result-metrics strong {
+    color: var(--text);
+    font: 700 19px 'Manrope', sans-serif;
+}
+.result-card .primary-button {
+    width: 100%;
+}
+.empty-action {
+    display: inline-flex;
+    margin-top: 18px;
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 700;
+}
+.result-hero {
+    margin: 32px 0 18px;
+    padding: 32px;
+    background: linear-gradient(110deg, #211d34, #171821 75%);
+    border: 1px solid #343047;
+    border-radius: 14px;
+}
+.result-hero h2 {
+    margin: 10px 0;
+    font: 700 25px 'Manrope', sans-serif;
+}
+.result-hero-status {
+    margin-top: 20px;
+    padding: 9px 14px;
+    font-size: 11px;
+}
+.result-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 15px;
+}
+.result-summary-card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.result-summary-card > strong {
+    font: 800 32px 'Manrope', sans-serif;
+    color: var(--text);
+}
+.result-summary-card > small {
+    color: var(--muted);
+    font-size: 11px;
+}
+.result-summary-card .outcome-text {
+    font-size: 23px;
+}
+.result-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-top: 20px;
+    padding: 18px;
+    background: #203b31;
+    border: 1px solid #315d49;
+    border-radius: 10px;
+}
+.result-note > span {
+    color: var(--green);
+    font-size: 19px;
+}
+.result-note strong {
+    color: #d8f2e4;
+    font-size: 12px;
+}
+.result-note p {
+    margin-top: 6px;
+    color: #a8cbb8;
+    font-size: 11px;
+    line-height: 1.7;
+}
+.result-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 22px;
+}
+.result-actions button {
+    border: 0;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+}
+.results-table td {
+    vertical-align: middle;
+}
+.results-table td:first-child strong {
+    color: var(--text);
+}
+@media (max-width: 760px) {
+    .result-summary-grid {
+        grid-template-columns: 1fr;
+    }
+    .result-hero {
+        padding: 24px;
+    }
+}
+@media print {
+    body {
+        background: #fff;
+        color: #111;
+    }
+    .sidebar,
+    .topbar,
+    .result-actions,
+    .page-footer {
+        display: none !important;
+    }
+    .main-content {
+        margin: 0;
+        padding: 0;
+    }
+    .result-hero,
+    .result-summary-card,
+    .result-note {
+        background: #fff;
+        color: #111;
+        border: 1px solid #bbb;
+    }
+    .result-hero h2,
+    .result-summary-card > strong,
+    .result-note strong {
+        color: #111;
+    }
+}

@@ -1,0 +1,100 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign in | OEP</title>
+    <link rel="stylesheet" href="{% static 'css/auth.css' %}">
+</head>
+<body>
+    <main class="auth-layout">
+        <section class="auth-panel">
+            <a class="brand" href="/">
+                <span class="brand-mark">O</span>
+                <span>OEP<span class="brand-muted">.</span></span>
+            </a>
+
+            <div class="auth-content">
+                <div class="eyebrow">ONLINE EXAM PORTAL</div>
+                <h1>Welcome back.</h1>
+                <p class="subtitle">Sign in to continue to your examination workspace.</p>
+
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert success">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+
+                {% if form.non_field_errors %}
+                    <div class="alert error">
+                        {% for error in form.non_field_errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <form method="post" class="auth-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ next }}">
+
+                    <div class="form-group">
+                        <label for="{{ form.username.id_for_label }}">Username</label>
+                        <input
+                            type="text"
+                            name="username"
+                            id="{{ form.username.id_for_label }}"
+                            placeholder="Enter your username"
+                            value="{{ form.username.value|default:'' }}"
+                            autocomplete="username"
+                            required
+                            autofocus
+                        >
+                        {% for error in form.username.errors %}
+                            <small class="field-error">{{ error }}</small>
+                        {% endfor %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.password.id_for_label }}">Password</label>
+                        <input
+                            type="password"
+                            name="password"
+                            id="{{ form.password.id_for_label }}"
+                            placeholder="Enter your password"
+                            autocomplete="current-password"
+                            required
+                        >
+                        {% for error in form.password.errors %}
+                            <small class="field-error">{{ error }}</small>
+                        {% endfor %}
+                    </div>
+
+                    <button type="submit" class="primary-button">
+                        Sign in <span aria-hidden="true">→</span>
+                    </button>
+                </form>
+
+                <p class="auth-footer">
+                    Don't have an account?
+                    <a href="{% url 'accounts:register' %}">Create an account</a>
+                </p>
+            </div>
+
+            <div class="bottom-note">
+                Secure examination access · OEP
+            </div>
+        </section>
+
+        <aside class="visual-panel">
+            <div class="visual-content">
+                <div class="visual-tag">YOUR LEARNING SPACE</div>
+                <div class="visual-symbol">✳</div>
+                <h2>Focus on what<br>you know.</h2>
+                <p>A dedicated space for assessments, learning and progress.</p>
+            </div>
+            <div class="visual-bottom">ONLINE EXAM PORTAL <span>© 2026</span></div>
+        </aside>
+    </main>
+</body>
+</html>
