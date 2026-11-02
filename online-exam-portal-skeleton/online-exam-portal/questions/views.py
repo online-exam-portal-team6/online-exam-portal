@@ -1,7 +1,6 @@
 """Question management views. Owner: Thejas."""
 
 from django.contrib import messages
-from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
 from accounts.decorators import admin_required
@@ -58,11 +57,43 @@ def question_create(request, exam_id):
 
 @admin_required
 def question_edit(request, exam_id, pk):
-    # TODO (Thejas, OEP-F-012): context form, exam, and question.
-    return HttpResponse("TODO (Thejas): question edit")
+    """Edit an MCQ question belonging to an examination."""
+    exam = get_object_or_404(Exam, pk=exam_id)
+    question = get_object_or_404(Question, pk=pk, exam=exam)
+
+    if request.method == "POST":
+        form = QuestionForm(request.POST, instance=question)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Question updated successfully.")
+            return redirect("questions:question_list", exam_id=exam.id)
+    else:
+        form = QuestionForm(instance=question)
+
+    return render(
+        request,
+        "questions/question_form.html",
+        {
+            "form": form,
+            "exam": exam,
+            "question": question,
+        },
+    )
 
 
 @admin_required
 def question_delete(request, exam_id, pk):
-    # TODO (Thejas, OEP-F-013): show confirmation; delete only on POST.
-    return HttpResponse("TODO (Thejas): question delete")
+    """Delete a question only after an administrator confirms with POST."""
+    exam = get_object_or_404(Exam, pk=exam_id)
+    question = get_object_or_404(Question, pk=pk, exam=exam)
+
+    if request.method == "POST":
+        question.delete()
+        messages.success(request, "Question deleted successfully.")
+        return redirect("questions:question_list", exam_id=exam.id)
+
+    return render(
+        request,
+        "questions/question_confirm_delete.html",
+        {"exam": exam, "question": question},
+    )
