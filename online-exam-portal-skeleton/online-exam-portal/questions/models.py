@@ -1,4 +1,3 @@
-
 """MCQ questions belonging to an examination."""
 
 from django.core.exceptions import ValidationError
@@ -26,6 +25,7 @@ class Question(models.Model):
         max_length=1,
         choices=Option.choices,
     )
+    marks = models.PositiveIntegerField(default=1)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

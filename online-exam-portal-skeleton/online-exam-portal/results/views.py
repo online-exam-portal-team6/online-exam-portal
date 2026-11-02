@@ -51,7 +51,12 @@ def _related_result(attempt):
         return None
     if "attempt" not in _field_names(result_model):
         return None
-    return result_model.objects.filter(attempt=attempt).first()
+    try:
+        return result_model.objects.filter(attempt=attempt).first()
+    except (TypeError, ValueError):
+        # Compatibility for legacy view tests/adapters that supply a lightweight
+        # attempt object rather than a persisted Django model instance.
+        return None
 
 
 def _read_value(objects, names):

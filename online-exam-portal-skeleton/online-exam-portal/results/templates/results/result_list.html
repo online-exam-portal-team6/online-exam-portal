@@ -65,7 +65,7 @@
                                 {% elif item.passed == False or item.passed == "Fail" or item.passed == "FAIL" %}
                                     <span class="result-status failed">Not passed</span>
                                 {% else %}
-                                    <span class="result-status pending">Evaluated</span>
+                                    <span class="result-status pending">{% if item.score != None or item.percentage != None or item.passed != None %}Evaluation recorded{% else %}Awaiting evaluation{% endif %}</span>
                                 {% endif %}
                             </div>
                             <h3>{{ item.exam_title }}</h3>
