@@ -1,31 +1,179 @@
+
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>{% if exam %}Edit examination{% else %}Create examination{% endif %}</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if exam %}Edit Examination{% else %}Create Examination{% endif %} | OEP</title>
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
 </head>
 <body>
-  <h1>{% if exam %}Edit examination{% else %}Create examination{% endif %}</h1>
+<div class="app-shell">
 
-  {% if messages %}
-    <ul class="messages">
-      {% for message in messages %}<li>{{ message }}</li>{% endfor %}
-    </ul>
-  {% endif %}
+    <aside class="sidebar">
+        <a href="{% url 'exams:admin_dashboard' %}" class="brand">
+            <span class="brand-icon">O</span>
+            <span>Exam<span class="brand-light">Portal</span></span>
+        </a>
 
-  <form method="post" novalidate>
-    {% csrf_token %}
-    {{ form.non_field_errors }}
-    {% for field in form %}
-      <p>
-        {{ field.label_tag }}
-        {{ field }}
-        {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
-        {{ field.errors }}
-      </p>
-    {% endfor %}
-    <button type="submit">Save examination</button>
-    <a href="{% url 'exams:exam_list' %}">Cancel</a>
-  </form>
+        <div class="sidebar-label">ADMINISTRATION</div>
+
+        <a href="{% url 'exams:admin_dashboard' %}" class="nav-link">
+            ▦ Dashboard
+        </a>
+        <a href="{% url 'exams:exam_list' %}" class="nav-link active">
+            ▤ Examinations
+        </a>
+        <a href="{% url 'accounts:student_list' %}" class="nav-link">
+            ♙ Students
+        </a>
+
+        <div class="sidebar-footer">
+            <div class="user-avatar">
+                {{ request.user.username|first|upper }}
+            </div>
+            <div class="user-details">
+                <strong>{{ request.user.first_name|default:request.user.username }}</strong>
+                <small>Administrator</small>
+            </div>
+            <form method="post" action="{% url 'accounts:logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="logout-button">↗</button>
+            </form>
+        </div>
+    </aside>
+
+    <main class="main-content">
+
+        <header class="topbar">
+            <div>
+                <span class="eyebrow">EXAMINATION MANAGEMENT</span>
+                <h1>{% if exam %}Edit examination{% else %}Create examination{% endif %}</h1>
+            </div>
+            <a href="{% url 'exams:exam_list' %}" class="text-link">
+                ← Back to examinations
+            </a>
+        </header>
+
+        <section class="form-intro">
+            <p class="eyebrow">EXAM CONFIGURATION</p>
+            <h2>
+                {% if exam %}Update your examination{% else %}Set up a new examination{% endif %}
+            </h2>
+            <p>
+                Configure the examination details, duration and availability
+                window. Students will be able to access it during the specified
+                time period.
+            </p>
+        </section>
+
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="message">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="post" class="exam-form" novalidate>
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="form-errors">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <div class="form-section-heading">
+                <span class="form-section-number">01</span>
+                <div>
+                    <h3>Basic information</h3>
+                    <p>Give your examination a title and description.</p>
+                </div>
+            </div>
+
+            <div class="form-field">
+                {{ form.title.label_tag }}
+                {{ form.title }}
+                {% for error in form.title.errors %}
+                    <small class="field-error">{{ error }}</small>
+                {% endfor %}
+            </div>
+
+            <div class="form-field">
+                {{ form.description.label_tag }}
+                {{ form.description }}
+                {% if form.description.help_text %}
+                    <small class="field-help">{{ form.description.help_text }}</small>
+                {% endif %}
+                {% for error in form.description.errors %}
+                    <small class="field-error">{{ error }}</small>
+                {% endfor %}
+            </div>
+
+            <div class="form-divider"></div>
+
+            <div class="form-section-heading">
+                <span class="form-section-number">02</span>
+                <div>
+                    <h3>Duration and scheduling</h3>
+                    <p>Set the time limit and when students can access the exam.</p>
+                </div>
+            </div>
+
+            <div class="form-field">
+                {{ form.duration_minutes.label_tag }}
+                {{ form.duration_minutes }}
+                <small class="field-help">Enter the allowed examination time in minutes.</small>
+                {% for error in form.duration_minutes.errors %}
+                    <small class="field-error">{{ error }}</small>
+                {% endfor %}
+            </div>
+
+            <div class="form-two-column">
+                <div class="form-field">
+                    {{ form.start_time.label_tag }}
+                    {{ form.start_time }}
+                    {% for error in form.start_time.errors %}
+                        <small class="field-error">{{ error }}</small>
+                    {% endfor %}
+                </div>
+
+                <div class="form-field">
+                    {{ form.end_time.label_tag }}
+                    {{ form.end_time }}
+                    {% for error in form.end_time.errors %}
+                        <small class="field-error">{{ error }}</small>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="form-note">
+                <span>ⓘ</span>
+                <p>
+                    The availability window must be at least as long as the
+                    examination duration. All times use the portal's configured
+                    timezone.
+                </p>
+            </div>
+
+            <div class="form-actions">
+                <a href="{% url 'exams:exam_list' %}" class="secondary-button">
+                    Cancel
+                </a>
+                <button type="submit" class="header-button">
+                    {% if exam %}Save changes{% else %}Create examination{% endif %}
+                    <span>→</span>
+                </button>
+            </div>
+
+        </form>
+
+        <footer class="page-footer">
+            Online Examination Portal <span>·</span> Examination Management
+        </footer>
+    </main>
+</div>
 </body>
 </html>

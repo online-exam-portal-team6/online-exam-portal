@@ -1,7 +1,6 @@
-
 # OEP-66: Take Exam Sequence Diagram
 
-**Status:** Intended design based on the SRS and the current view/service contracts. Exam-taking and evaluation services are still placeholders.
+**Status:** Intended end-to-end flow based on the SRS and service contracts. Result evaluation remains a separately owned integration dependency.
 
 ```mermaid
 sequenceDiagram
@@ -17,52 +16,54 @@ sequenceDiagram
     participant ResultView as Result Detail View
 
     Student->>Browser: Open available exam
-    Browser->>StartView: GET /exams/{exam_id}/start/
+    Browser->>StartView: GET exam start page
     StartView-->>Browser: Display exam rules
     Browser-->>Student: Show rules and start option
 
     Student->>Browser: Confirm start
     Browser->>StartView: POST start request
     StartView->>AttemptService: start_attempt(student, exam)
-    AttemptService->>DB: Create exam attempt
-    DB-->>AttemptService: Attempt created
+    AttemptService->>DB: Create or retrieve unique attempt
+    DB-->>AttemptService: Attempt record
     AttemptService-->>StartView: Return attempt
     StartView-->>Browser: Redirect to exam-taking page
 
-    Browser->>ExamView: GET /attempts/{attempt_id}/take/
-    ExamView->>DB: Load exam, questions, saved answers and timing
+    Browser->>ExamView: GET attempt page
+    ExamView->>DB: Load exam, questions, answers and deadline
     DB-->>ExamView: Return exam data
     ExamView-->>Browser: Render questions and timer
     Browser-->>Student: Display exam
 
     loop For each answer
-        Student->>Browser: Select an option
+        Student->>Browser: Select or change an option
         Browser->>AnswerService: POST question_id and option
-        AnswerService->>DB: Save answer
+        AnswerService->>DB: Validate ownership, exam and deadline; save answer
         DB-->>AnswerService: Save outcome
-        AnswerService-->>Browser: Return status and remaining time
+        AnswerService-->>Browser: Return save status
     end
 
-    alt Student submits before time expires
-        Student->>Browser: Submit exam
-        Browser->>SubmitView: POST submit request
-    else Time expires
-        Browser->>SubmitView: Trigger automatic submission
+    alt Student submits before deadline
+        Student->>Browser: Confirm submission
+        Browser->>SubmitView: POST manual submit
+    else Timer reaches zero
+        Browser->>SubmitView: POST automatic submit
     end
 
     SubmitView->>AttemptService: submit_attempt(attempt, auto)
-    AttemptService->>DB: Set SUBMITTED or AUTO_SUBMITTED
-    DB-->>AttemptService: Submission status
+    AttemptService->>DB: Persist submitted state and timestamp
+    DB-->>AttemptService: Submission state
     AttemptService->>Evaluation: evaluate_attempt(attempt)
     Evaluation->>DB: Read answers and correct options
     DB-->>Evaluation: Return answer data
-    Evaluation->>DB: Store score, percentage and pass status
+    Evaluation->>DB: Persist score and pass/fail result
     DB-->>Evaluation: Evaluation saved
     Evaluation-->>AttemptService: Return evaluation outcome
     AttemptService-->>SubmitView: Submission complete
     SubmitView-->>Browser: Redirect to result detail
 
-    Browser->>ResultView: GET /results/{attempt_id}/
+    Browser->>ResultView: GET result detail
     ResultView-->>Browser: Return result details
     Browser-->>Student: Display examination result
 ```
+
+**Integration note:** The current results evaluator is still a placeholder in the inspected main branch. The evaluation lifeline documents the intended contract and is not proof that score persistence is implemented.

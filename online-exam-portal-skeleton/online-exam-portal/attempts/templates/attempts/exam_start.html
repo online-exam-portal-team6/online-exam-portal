@@ -1,0 +1,91 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ exam.title }} | Exam Portal</title>
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <style>
+        .start-layout { max-width: 1080px; margin: 0 auto; }
+        .start-hero { margin: 30px 0 22px; padding: 30px; background: linear-gradient(110deg,#211d34,#171821 75%); border:1px solid #343047; border-radius:14px; }
+        .start-hero h2 { margin:10px 0; font:700 26px 'Manrope',sans-serif; }
+        .start-hero p { color:#a8a8b5; font-size:13px; line-height:1.7; }
+        .start-meta { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; margin:22px 0; }
+        .meta-card { padding:18px; background:#15171e; border:1px solid #252833; border-radius:10px; }
+        .meta-card span { display:block; color:#9295a3; font-size:11px; margin-bottom:8px; }
+        .meta-card strong { font-size:14px; }
+        .rules-card { padding:24px; background:#15171e; border:1px solid #252833; border-radius:12px; }
+        .rules-card h3 { font:700 16px 'Manrope',sans-serif; margin-bottom:16px; }
+        .rules-list { padding-left:20px; color:#c5c6d0; font-size:13px; line-height:1.9; }
+        .availability { margin:18px 0; padding:13px 15px; border-radius:8px; background:#203b31; color:#70d6a0; font-size:12px; }
+        .availability.unavailable { background:#422b30; color:#ff9999; }
+        .start-actions { display:flex; gap:12px; align-items:center; margin-top:22px; }
+        .start-actions button { border:0; cursor:pointer; font-family:inherit; }
+        @media(max-width:650px) { .start-meta { grid-template-columns:1fr; } .start-hero,.rules-card { padding:20px; } .start-actions { align-items:stretch; flex-direction:column; } }
+    </style>
+</head>
+<body>
+<div class="app-shell">
+    <aside class="sidebar">
+        <a href="{% url 'exams:student_dashboard' %}" class="brand"><span class="brand-icon">O</span><span>Exam<span class="brand-light">Portal</span></span></a>
+        <div class="sidebar-label">STUDENT MENU</div>
+        <a href="{% url 'exams:student_dashboard' %}" class="nav-link active">▦ Dashboard</a>
+        <a href="{% url 'results:result_list' %}" class="nav-link">▤ My results</a>
+        <div class="sidebar-footer">
+            <div class="user-avatar">{{ request.user.username|first|upper }}</div>
+            <div class="user-details"><strong>{{ request.user.first_name|default:request.user.username }}</strong><small>Student</small></div>
+            <form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}<button type="submit" class="logout-button" title="Log out">↗</button></form>
+        </div>
+    </aside>
+    <main class="main-content start-layout">
+        <header class="topbar">
+            <div><span class="eyebrow">EXAMINATION CENTRE</span><h1>Review exam instructions</h1></div>
+            <a class="text-link" href="{% url 'exams:student_dashboard' %}">← Back to dashboard</a>
+        </header>
+        {% if messages %}
+            <div class="messages" role="status">
+                {% for message in messages %}<div class="message">{{ message }}</div>{% endfor %}
+            </div>
+        {% endif %}
+        <section class="start-hero">
+            <p class="eyebrow">READY WHEN YOU ARE</p>
+            <h2>{{ exam.title }}</h2>
+            <p>{{ exam.description|default:"Read the examination details and rules carefully before starting." }}</p>
+        </section>
+        <section class="start-meta" aria-label="Examination details">
+            <article class="meta-card"><span>DURATION</span><strong>{{ exam.duration_minutes }} minutes</strong></article>
+            <article class="meta-card"><span>AVAILABLE FROM</span><strong>{{ exam.start_time|date:"d M Y, H:i" }}</strong></article>
+            <article class="meta-card"><span>AVAILABLE UNTIL</span><strong>{{ exam.end_time|date:"d M Y, H:i" }}</strong></article>
+        </section>
+        <section class="rules-card">
+            <h3>Before you begin</h3>
+            <ol class="rules-list">
+                <li>Your examination timer starts as soon as you start the attempt.</li>
+                <li>Only one attempt is permitted for this examination.</li>
+                <li>Your selected answers are saved automatically when you choose an option.</li>
+                <li>You can change an answer while the examination is in progress.</li>
+                <li>Submit your examination before the deadline. If time expires, the server submits your attempt automatically.</li>
+                <li>Keep this page open during the examination and ensure you have a stable internet connection.</li>
+            </ol>
+            {% if is_available %}
+                <p class="availability" role="status">This examination is currently available. You can start when ready.</p>
+            {% else %}
+                <p class="availability unavailable" role="status">This examination is not currently available. Check the availability window and try again later.</p>
+            {% endif %}
+            <div class="start-actions">
+                {% if is_available %}
+                    <form method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="primary-button">I understand — start examination <span>→</span></button>
+                    </form>
+                {% else %}
+                    <a class="secondary-button" href="{% url 'exams:student_dashboard' %}">Return to dashboard</a>
+                {% endif %}
+            </div>
+        </section>
+        <footer class="page-footer">Online Examination Portal <span>·</span> Examination instructions</footer>
+    </main>
+</div>
+</body>
+</html>
