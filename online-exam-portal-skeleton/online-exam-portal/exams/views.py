@@ -1,8 +1,8 @@
-"""Exam management views. Owner: Thejas. Replace the stub bodies, keep the decorators and names."""
+"""Exam management views for students and administrators."""
 from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect, render
-from django.http import HttpResponse
 from django.utils import timezone
+from django.views.decorators.http import require_POST
 
 from .services import get_available_exams_for
 from accounts.decorators import admin_required, student_required
@@ -63,14 +63,19 @@ def exam_create(request):
             exam = form.save(commit=False)
             exam.created_by = request.user
             exam.save()
-            messages.success(request, f'Examination "{exam.title}" was created.')
+            messages.success(
+                request, f'Examination "{exam.title}" was created.'
+            )
             return redirect("exams:exam_list")
     else:
         form = ExamForm()
-    return render(request, "exams/exam_form.html", {"form": form, "exam": None})
+    return render(
+        request,
+        "exams/exam_form.html",
+        {"form": form, "exam": None},
+    )
 
 
-@admin_required
 @admin_required
 def exam_edit(request, pk):
     """OEP-26: Allow an administrator to update an existing examination."""
@@ -104,6 +109,13 @@ def exam_edit(request, pk):
 
 
 @admin_required
+@require_POST
 def exam_toggle(request, pk):
-    # TODO (Thejas, stretch OEP-F-009): activate / deactivate an exam
-    return HttpResponse("TODO (Thejas): exam toggle")
+    """Activate or deactivate an examination from its management card."""
+    exam = get_object_or_404(Exam, pk=pk)
+    exam.is_active = not exam.is_active
+    exam.save(update_fields=["is_active"])
+
+    state = "activated" if exam.is_active else "deactivated"
+    messages.success(request, f'Examination "{exam.title}" was {state}.')
+    return redirect("exams:exam_list")
