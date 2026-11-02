@@ -3,8 +3,10 @@ from django.contrib import admin
 from django.urls import include, path
 
 from accounts.views import root_redirect
+from oep.health import health_check
 
 urlpatterns = [
+    path("health/", health_check, name="health_check"),
     path("django-admin/", admin.site.urls),
     path("", root_redirect, name="root"),
     path("", include("accounts.urls")),
