@@ -1,4 +1,3 @@
-
 import os
 
 from django.contrib.auth import get_user_model
@@ -17,7 +16,6 @@ class Command(BaseCommand):
             raise CommandError("DJANGO_SUPERUSER_USERNAME is missing.")
 
         User = get_user_model()
-
         existing_user = User.objects.filter(username=username).first()
 
         if existing_user:
@@ -26,22 +24,18 @@ class Command(BaseCommand):
                     "This username already exists but is not a superuser."
                 )
 
-            self.stdout.write(
-                self.style.SUCCESS("Admin account already exists.")
-            )
+            self.stdout.write("Admin account already exists.")
             return
 
         if not email or not password:
             raise CommandError("Admin email or password is missing.")
 
-        user = User.objects.create_superuser(
+        User.objects.create_superuser(
             username=username,
             email=email,
             password=password,
         )
 
         self.stdout.write(
-            self.style.SUCCESS(
-                f"Admin account '{user.username}' created successfully."
-            )
+            self.style.SUCCESS("Admin account created successfully.")
         )
