@@ -91,7 +91,10 @@ class Command(BaseCommand):
                     topic = "Python" if exam_index == 0 else "Django"
                     Question.objects.create(
                         exam=exam,
-                        text=f"{topic} demo question {question_number}: choose option A.",
+                        text=(
+                            f"{topic} demo question {question_number}: "
+                            "choose option A."
+                        ),
                         option_a="Correct sample answer",
                         option_b="Sample distractor B",
                         option_c="Sample distractor C",
@@ -104,4 +107,6 @@ class Command(BaseCommand):
             "Demo data is ready: 1 admin, 3 students, 2 exams, and 20 questions."
         ))
         self.stdout.write("New demo accounts use the supplied --password value.")
-        self.stdout.write("Usernames: demo_admin, demo_student1, demo_student2, demo_student3")
+        self.stdout.write(
+            "Usernames: demo_admin, demo_student1, demo_student2, demo_student3"
+        )
