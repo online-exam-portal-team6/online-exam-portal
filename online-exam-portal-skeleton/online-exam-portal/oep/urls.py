@@ -17,3 +17,5 @@ urlpatterns = [
 ]
 
 handler403 = "accounts.views.error_403"
+handler404 = "accounts.views.error_404"
+handler500 = "accounts.views.error_500"
