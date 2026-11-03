@@ -14,10 +14,19 @@ class SeedDemoCommandTests(TestCase):
         call_command("seed_demo", stdout=StringIO())
 
         User = get_user_model()
-        self.assertEqual(User.objects.filter(username="demo_admin", is_superuser=True).count(), 1)
-        self.assertEqual(User.objects.filter(username__startswith="demo_student").count(), 3)
+        admin_count = User.objects.filter(
+            username="demo_admin", is_superuser=True
+        ).count()
+        self.assertEqual(admin_count, 1)
+        student_count = User.objects.filter(
+            username__startswith="demo_student"
+        ).count()
+        self.assertEqual(student_count, 3)
         self.assertEqual(Exam.objects.filter(title__startswith="Demo ").count(), 2)
-        self.assertEqual(Question.objects.filter(exam__title__startswith="Demo ").count(), 20)
+        question_count = Question.objects.filter(
+            exam__title__startswith="Demo "
+        ).count()
+        self.assertEqual(question_count, 20)
         for exam in Exam.objects.filter(title__startswith="Demo "):
             self.assertEqual(exam.questions.count(), 10)
 
