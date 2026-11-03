@@ -29,6 +29,16 @@ def error_403(request, exception=None):
         return HttpResponseForbidden("403 Forbidden")
 
 
+def error_404(request, exception=None):
+    """Render the generic not-found page."""
+    return render(request, "404.html", status=404)
+
+
+def error_500(request):
+    """Render a generic server-error page without exposing exception details."""
+    return render(request, "500.html", status=500)
+
+
 def login_view(request):
     if request.user.is_authenticated:
         return redirect("root")
