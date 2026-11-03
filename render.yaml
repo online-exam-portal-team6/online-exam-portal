@@ -5,8 +5,8 @@ services:
     branch: main
     rootDir: online-exam-portal-skeleton/online-exam-portal
     plan: free
-    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput
-    startCommand: python manage.py migrate --noinput && gunicorn oep.wsgi:application --bind 0.0.0.0:$PORT
+    buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --noinput"
+    startCommand: "python manage.py migrate --noinput && gunicorn oep.wsgi:application --bind 0.0.0.0:$PORT"
     healthCheckPath: /health/
     autoDeployTrigger: checksPass
     region: singapore
