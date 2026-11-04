@@ -1,0 +1,19 @@
+digraph OEPClass {
+  graph [rankdir=TB, splines=polyline, fontname="Arial", label="ONLINE EXAMINATION PORTAL — CLASS DIAGRAM", labelloc=t];
+  node [shape=record, fontname="Arial"];
+  User [label="{User (Django AUTH_USER_MODEL)|id : BigAutoField\lusername : CharField\lemail : EmailField\lis_staff : Boolean\l}"];
+  Exam [label="{Exam|id : BigAutoField\ltitle : CharField\ldescription : TextField\lduration_minutes : PositiveInteger\lstart_time / end_time : DateTime\lis_active : Boolean\lpass_percentage : Decimal\lcreated_by : FK(User)\lcreated_at : DateTime\l}"];
+  Question [label="{Question|id : BigAutoField\lexam : FK(Exam)\ltext : TextField\loption_a..option_d : CharField\lcorrect_option : CharField (A-D)\lmarks : PositiveInteger\lcreated_at : DateTime\l}"];
+  Attempt [label="{Attempt|id : BigAutoField\lstudent : FK(User)\lexam : FK(Exam)\lstarted_at / deadline_at : DateTime\lsubmitted_at : DateTime?\lstatus : IN_PROGRESS / SUBMITTED / AUTO_SUBMITTED\l}"];
+  AttemptAnswer [label="{AttemptAnswer|id : BigAutoField\lattempt : FK(Attempt)\lquestion : FK(Question)\lselected_option : CharField (A-D)\lupdated_at : DateTime\l}"];
+  Result [label="{Result|id : BigAutoField\lattempt : OneToOne(Attempt)\lstudent : FK(User)\lexam : FK(Exam)\lscore / total_marks : PositiveInteger\lpercentage : Decimal(6,2)\lpassed : Boolean\lcreated_at / updated_at : DateTime\l}"];
+  User -> Exam [label="creates 1 : 0..*"];
+  User -> Attempt [label="student 1 : 0..*"];
+  User -> Result [label="student 1 : 0..*"];
+  Exam -> Question [label="questions 1 : 0..*"];
+  Exam -> Attempt [label="attempts 1 : 0..*"];
+  Exam -> Result [label="results 1 : 0..*"];
+  Attempt -> AttemptAnswer [label="answers 1 : 0..*"];
+  Question -> AttemptAnswer [label="selected for 1 : 0..*"];
+  Attempt -> Result [label="evaluated as 1 : 0..1"];
+}
