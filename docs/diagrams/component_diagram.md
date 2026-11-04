@@ -47,10 +47,10 @@ flowchart TB
 | Exams | IExamAdministration — exam list, create/edit and student availability views | IIdentitySession, IExamPersistence |
 | Questions | IQuestionManagement — question list, create, edit and delete workflows | IAdminAuthorization, IExamLookup, IQuestionPersistence |
 | Attempts | IAttemptLifecycle — start, timed attempt, save/change answer and submit | IIdentitySession, IExamAvailability, IQuestionLookup, IAttemptPersistence, IAnswerPersistence, IResultEvaluation |
-| Results | IResultPresentation — student result list/detail and administrator result list | IIdentitySession, IResultPersistence, attempt evaluation outcome and ownership data |
+| Results | IResultPresentation — student result list/detail and administrator result list | IIdentitySession, IResultPersistence, persisted evaluation outcome and ownership data |
 | Templates/static UI | IPortalPresentation — server-rendered screens and browser interactions | App view contexts, named URLs and static assets |
 | Django auth/session | IIdentitySession — authenticated user and session state | User model and configured session store |
-| Relational database | Persistence interfaces for Exam, Question, Attempt, AttemptAnswer and (when implemented) Result records | Database engine and Django ORM configuration |
+| Relational database | Persistence interfaces for Exam, Question, Attempt, AttemptAnswer and Result records | Database engine and Django ORM configuration |
 
 ## Interface connections
 
@@ -60,4 +60,4 @@ flowchart TB
 - IResultPresentation exposes only the current student's own result and the administrator result register, subject to role and ownership checks.
 - The persistence interfaces are logical contracts implemented through Django ORM models/querysets; they are not independent network APIs.
 
-The deployment is a single Django application sharing one configured relational database. This source documents the component boundaries and interface directions; the draw.io UML export is a separate visual evidence asset.
+The deployment is a single Django application sharing one configured relational database. The editable UML draw.io component diagram is committed as `docs/diagrams/component_diagram.drawio`; its PNG export remains a separate visual evidence asset.
