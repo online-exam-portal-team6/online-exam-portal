@@ -44,10 +44,10 @@ Nielsen's ten usability heuristics were applied to the rendered screens and the 
 
 ## Functional observations requiring follow-up
 
-1. **Student dashboard history count:** the captured dashboard reports zero completed exams while the supplied results screen shows one submitted result. Verify that the dashboard and results page use the same attempt query and ownership filters.
-2. **Evaluation state:** the results card labels the attempt “Evaluated” while score and percentage are both blank. Show a pending/not-yet-evaluated state until evaluation data exists.
-3. **Authorization error presentation:** wrong-role or non-owner access should render the designed 403 page rather than plain text; verify that the required 403 template exists.
-4. **Question management:** question management screens/navigation are present, but backend TODOs remain in the question views and require the owning backend contributor's implementation and end-to-end verification.
+1. **Student dashboard history count:** the captured dashboard reports zero completed exams while the supplied results screen shows one submitted result. Recheck the dashboard and result-history queries against the integrated attempt/result data.
+2. **Evaluation state:** the results card labels the attempt “Evaluated” while score and percentage are both blank. Verify that the current UI now shows a pending state until a persisted Result exists.
+3. **Authorization error presentation:** wrong-role or non-owner access should render the designed 403 page; verify the integrated handler and object-ownership behaviour.
+4. **Question management integration:** question create, edit and delete implementation is now merged (PRs #17, #20 and #21). The remaining task is end-to-end browser verification of the list/form/delete flows with administrator permissions and validation errors.
 5. **Administrator mobile coverage:** add mobile screenshots for administrator dashboard/exam management and exam-taking if responsive acceptance requires those roles/flows.
 
 ## Accessibility checks
@@ -56,12 +56,12 @@ Inputs need programmatic labels; status updates should use appropriate live regi
 
 ## Priority actions
 
-1. Fix the mismatch between dashboard completed-attempt count and result history.
-2. Distinguish pending evaluation from evaluated results; never show an evaluated badge with missing score data.
-3. Ensure authorization failures render a consistent 403 page.
-4. Complete the question-management backend integration with the owning contributor.
+1. Recheck the dashboard completed-attempt count against the results history using the integrated result model.
+2. Confirm pending versus evaluated state using a submitted attempt with and without a persisted Result.
+3. Verify authorization failures render the designed 403 page and student result ownership is enforced.
+4. Browser-test question create/edit/delete, including invalid input and delete confirmation.
 5. Add administrator and exam-taking mobile captures if required by acceptance criteria.
-6. Commit the eight supplied PNG files under `docs/images/usability/` so reviewers can inspect the actual evidence in the repository.
+6. Commit the eight supplied PNG files under `docs/images/usability/` so reviewers can inspect the actual image evidence in the repository.
 
 ## Evidence limitation
 

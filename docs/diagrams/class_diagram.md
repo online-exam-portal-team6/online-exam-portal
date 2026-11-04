@@ -1,6 +1,6 @@
 # Online Examination Portal — class diagram
 
-This class diagram reflects the model contract in the current exam/attempt skeleton plus the Result model and scoring fields introduced in the results integration PR #24 (which is still open and must be merged before this schema is present on main). It is therefore an integration-target diagram, not a claim that PR #24 is already merged.
+This class diagram reflects the models currently present on the repository's main branch, including the persisted Result model and scoring fields integrated by PR #24. It is an implementation-aligned model view, not a proposed future schema.
 
 ```mermaid
 classDiagram
@@ -84,14 +84,14 @@ classDiagram
 - **Exam–Attempt:** each Attempt belongs to one Exam; Exam deletion is protected. A unique constraint permits one attempt per student/exam.
 - **Attempt–AttemptAnswer:** an Attempt has zero or many saved answers; deleting an Attempt cascades to its answers. One answer per attempt/question is enforced by a unique constraint.
 - **Question–AttemptAnswer:** each saved answer refers to one Question; deleting a referenced Question is protected. Selected option is A, B, C or D.
-- **Attempt–Result:** each Result refers to exactly one Attempt through a OneToOneField; each Attempt has zero or one Result. Result deletion of its referenced Attempt is protected.
+- **Attempt–Result:** each Result refers to exactly one Attempt through a OneToOneField; each Attempt has zero or one Result. Deletion of a referenced Attempt is protected.
 - **User–Result and Exam–Result:** each Result records the student and exam for the evaluated attempt; both references use PROTECT.
 - **Exam scoring configuration:** pass_percentage is a DecimalField (default 50.00) constrained by model validation to 0–100.
 - **Question scoring configuration:** marks is a PositiveIntegerField (default 1).
 - **Result values:** score and total_marks are positive integers; percentage is Decimal(6,2); passed is boolean; created_at and updated_at are timestamps.
 
-## Status and scope
+## Status and evaluation behaviour
 
-The Attempt status is IN_PROGRESS, SUBMITTED or AUTO_SUBMITTED. Result is created/updated by the evaluation service after submission; the service compares saved answers with each question's correct option and calculates weighted marks and percentage.
+Attempt status is IN_PROGRESS, SUBMITTED or AUTO_SUBMITTED. The result evaluation service compares saved answers with each question's correct option, sums the marks assigned to correctly answered questions, calculates percentage against total marks, checks the exam pass threshold, and persists one Result per attempt. Evaluation is limited to submitted or auto-submitted attempts and uses a transaction/row lock plus update_or_create to make persistence idempotent.
 
-**Integration dependency:** Result, Exam.pass_percentage and Question.marks are supplied by PR #24 (Bhumika's evaluation/results integration). The diagram records that proposed schema so the team can review the complete target model. If PR #24 changes before merge, update this diagram to the merged model before treating it as final.
+The model and service details were checked against the merged implementation in results/models.py and results/services.py. The editable draw.io class diagram is committed separately; the PNG export remains a separate evidence deliverable.
