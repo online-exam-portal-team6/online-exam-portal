@@ -24,4 +24,4 @@ class CustomErrorPageTests(SimpleTestCase):
         response = views.error_500(request)
         self.assertEqual(response.status_code, 500)
         self.assertContains(response, "Something went wrong", status_code=500)
-        self.assertNotContains(response, "Traceback")
+        self.assertNotContains(response, "Traceback", status_code=500)
