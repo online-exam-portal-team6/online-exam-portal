@@ -102,3 +102,23 @@ def logout_view(request):
     logout(request)
     messages.success(request, "You have been logged out successfully.")
     return redirect("accounts:login")
+
+
+@login_required
+def student_profile(request):
+    """Allow a student to view and update their own permitted profile fields."""
+    if request.user.is_staff or request.user.is_superuser:
+        return HttpResponseForbidden("Student profile is available to student accounts only.")
+
+    from .forms import StudentProfileForm
+
+    if request.method == "POST":
+        form = StudentProfileForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Your profile has been updated successfully.")
+            return redirect("accounts:profile")
+    else:
+        form = StudentProfileForm(instance=request.user)
+
+    return render(request, "accounts/profile.html", {"form": form})
