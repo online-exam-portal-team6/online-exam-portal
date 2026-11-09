@@ -26,6 +26,10 @@
                 <span>▤</span> My results
             </a>
 
+            <a href="{% url 'accounts:profile' %}" class="nav-link">
+                <span>♙</span> My Profile
+            </a>
+
             <div class="sidebar-footer">
                 <div class="user-avatar">
                     {{ request.user.username|first|upper }}
