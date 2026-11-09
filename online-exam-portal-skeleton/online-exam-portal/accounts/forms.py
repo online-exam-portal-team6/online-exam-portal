@@ -40,10 +40,8 @@ class RegistrationForm(forms.ModelForm):
         cleaned_data = super().clean()
         password1 = cleaned_data.get("password1")
         password2 = cleaned_data.get("password2")
-
         if password1 and password2 and password1 != password2:
             self.add_error("password2", "The passwords do not match.")
-
         return cleaned_data
 
     def save(self, commit=True):
@@ -52,8 +50,25 @@ class RegistrationForm(forms.ModelForm):
         user.set_password(self.cleaned_data["password1"])
         user.is_staff = False
         user.is_superuser = False
-
         if commit:
             user.save()
-
         return user
+
+
+class StudentProfileForm(forms.ModelForm):
+    """Allow a student to edit only their own basic contact/name details."""
+
+    class Meta:
+        model = User
+        fields = ["first_name", "last_name", "email"]
+        widgets = {
+            "first_name": forms.TextInput(attrs={"autocomplete": "given-name"}),
+            "last_name": forms.TextInput(attrs={"autocomplete": "family-name"}),
+            "email": forms.EmailInput(attrs={"autocomplete": "email"}),
+        }
+
+    def clean_email(self):
+        email = self.cleaned_data["email"].strip().lower()
+        if User.objects.filter(email__iexact=email).exclude(pk=self.instance.pk).exists():
+            raise forms.ValidationError("An account with this email already exists.")
+        return email
