@@ -1,4 +1,4 @@
-"""Tests for displaying the timed exam page (OEP-F-015/016)."""
+"""Tests for displaying the timed exam page (TC-EXAM-06, OEP-F-015/016)."""
 from datetime import timedelta
 
 from django.contrib.auth.models import User
@@ -50,6 +50,21 @@ class ExamTakeViewTests(TestCase):
         self.assertEqual(response.context["exam"], self.exam)
         self.assertEqual(list(response.context["questions"]), [self.question])
         self.assertGreater(response.context["remaining_seconds"], 0)
+
+    def test_TC_EXAM_06_question_page_renders_question_and_all_options(self):
+        """The exam template displays the question and its four answer choices."""
+        self.client.force_login(self.student)
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "attempts/exam_take.html")
+        self.assertContains(response, "Which keyword defines a function?")
+        for option in ("func", "def", "function", "lambda"):
+            with self.subTest(option=option):
+                self.assertContains(response, option)
+        self.assertContains(response, reverse("attempts:save_answer", args=[self.attempt.pk]))
+        self.assertContains(response, reverse("attempts:exam_submit", args=[self.attempt.pk]))
 
     def test_TC_ATT_02_student_cannot_view_another_students_attempt(self):
         self.client.force_login(self.other_student)

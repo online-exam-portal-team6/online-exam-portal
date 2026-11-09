@@ -124,6 +124,8 @@ class ResultPageTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "results/result_detail.html")
         self.assertContains(response, "Mathematics assessment")
+        self.assertContains(response, "8")
+        self.assertContains(response, "10")
         self.assertContains(response, "80.00%")
         self.assertContains(response, "PASS")
 
