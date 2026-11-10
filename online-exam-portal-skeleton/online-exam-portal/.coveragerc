@@ -1,0 +1,23 @@
+[run]
+branch = True
+source = .
+omit =
+    */migrations/*
+    */tests/*
+    tests/*
+    */test_*.py
+    manage.py
+    oep/wsgi.py
+
+[report]
+omit =
+    */migrations/*
+    */tests/*
+    tests/*
+    */test_*.py
+    manage.py
+    oep/wsgi.py
+show_missing = True
+skip_covered = False
+precision = 2
+fail_under = 70
