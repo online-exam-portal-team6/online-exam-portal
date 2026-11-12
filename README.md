@@ -15,7 +15,8 @@ A role-based web application for creating, conducting, and automatically evaluat
 - View examinations available during their configured availability window.
 - Start a timed attempt, save and change answers, and submit manually.
 - Have an expired attempt automatically submitted by the server.
-- View evaluated results and update basic profile details where enabled.
+- View evaluated results.
+- Student profile editing is proposed separately in open PR #56 and is not part of the current `main` branch.
 
 ### Reliability and security
 - Role-based access controls for administrator and student routes.
