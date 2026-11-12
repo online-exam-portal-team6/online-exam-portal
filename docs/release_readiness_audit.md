@@ -19,13 +19,17 @@ A green workflow confirms the configured automated checks passed for that commit
 
 ## 2. Pull request state
 
-At the time of this audit, one pull request was open:
+At the time of this follow-up, three pull requests were open:
 
 | PR | Scope | Head commit | CI | Review state |
 |---|---|---|---|---|
-| [#56 — Student profile view and edit (OEP-F-005)](https://github.com/online-exam-portal-team6/online-exam-portal/pull/56) | Student profile view/edit, validation, access-control tests | `dbbba175f042e826a71d94d876bafaab1a80a323` | Python 3.11 and 3.12 passed | No submitted reviews; PR remains open |
+| [#56 — Student profile view and edit (OEP-F-005)](https://github.com/online-exam-portal-team6/online-exam-portal/pull/56) | Teammate's student profile view/edit, validation, access-control tests | `dbbba175f042e826a71d94d876bafaab1a80a323` | Python 3.11 and 3.12 passed | No submitted reviews; PR remains open |
+| [#61 — Release-readiness documentation](https://github.com/online-exam-portal-team6/online-exam-portal/pull/61) | README quick start and this audit | `7e9b3e1859b721e0e6206b5d8d3f7c9be456c92e` | Python 3.11 and 3.12 passed | Review requested; no submitted reviews |
+| [#62 — Student dashboard history](https://github.com/online-exam-portal-team6/online-exam-portal/pull/62) | Populate completed-attempt history, show evaluation state, add regression tests | `e9820c073f1fcd83161f4bc6298ea167744cd0d9` | Initial run failed on an incorrect test assertion; corrected commit is being rechecked | No submitted reviews |
 
-PR #56 is authored by a teammate and is intentionally left open for team review. The earlier regression log classifies student profile editing as a stretch/backlog feature outside the stated v1.0 scope. Do not merge it solely to close the PR; confirm scope and obtain an independent review/approval first.
+PR #56 is authored by a teammate and is intentionally left open for team review. Its current base points to the earlier `4db3a21` commit rather than the audited current `main`; it needs the author's rebase/update before it can be safely considered for integration. The earlier regression log classifies student profile editing as a stretch/backlog feature outside the stated v1.0 scope. Do not merge it solely to close the PR; confirm scope and obtain an independent review/approval first.
+
+PR #62 fixes a real dashboard defect: the view had hard-coded an empty completed-attempt list, so the dashboard never showed submission history. Its follow-up test now checks history ownership and excludes in-progress/other-student attempts from the history queryset without incorrectly asserting that their exam cards must disappear from the separate available-exams section.
 
 PR [#57 — OEP-84 end-to-end exam flow](https://github.com/online-exam-portal-team6/online-exam-portal/pull/57) was merged into `main` on 2026-11-09. Its exam-flow and timeout tests are present in the audited main tree.
 
