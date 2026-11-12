@@ -93,8 +93,15 @@ class StudentDashboardHistoryTests(TestCase):
         self.assertContains(response, "Awaiting evaluation examination")
         self.assertContains(response, "80.00%")
         self.assertContains(response, "Awaiting evaluation")
-        self.assertNotContains(response, "In progress examination")
-        self.assertNotContains(response, "Another student's examination")
+        self.assertTrue(all(
+            attempt.student_id == self.student.pk for attempt in attempts
+        ))
+        self.assertNotIn(
+            in_progress_exam.pk, {attempt.exam_id for attempt in attempts}
+        )
+        self.assertNotIn(
+            other_exam.pk, {attempt.exam_id for attempt in attempts}
+        )
 
     def test_dashboard_limits_history_cards_but_keeps_total_count(self):
         for index in range(7):
