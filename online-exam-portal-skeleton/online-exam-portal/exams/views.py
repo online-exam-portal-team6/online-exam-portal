@@ -4,11 +4,12 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
-from .services import get_available_exams_for
 from accounts.decorators import admin_required, student_required
+from attempts.models import Attempt
 
 from .forms import ExamForm
 from .models import Exam
+from .services import get_available_exams_for
 
 from django.contrib.auth import get_user_model
 
@@ -17,12 +18,22 @@ from django.contrib.auth import get_user_model
 def student_dashboard(request):
     """OEP-F-010: Display available exams and the student's activity."""
     available_exams = get_available_exams_for(request.user)
-
-    completed_attempts = []
+    completed_attempts = (
+        Attempt.objects.filter(
+            student=request.user,
+            status__in=[
+                Attempt.Status.SUBMITTED,
+                Attempt.Status.AUTO_SUBMITTED,
+            ],
+        )
+        .select_related("exam", "result")
+        .order_by("-submitted_at")
+    )
 
     context = {
         "available_exams": available_exams,
-        "completed_attempts": completed_attempts,
+        "completed_attempt_count": completed_attempts.count(),
+        "completed_attempts": completed_attempts[:5],
         "now": timezone.now(),
     }
 
