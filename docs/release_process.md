@@ -14,8 +14,9 @@ Exam Portal. Releases are made from reviewed code integrated into `main`.
    project dependencies have changed.
 5. Check that database migrations are committed and that the deployment
    configuration is ready. Do not include secrets in source control.
-6. Prepare release notes in `docs/releases/` describing user-visible changes,
-   compatibility notes, and known limitations.
+6. Update `CHANGELOG.md` with the release version, date, and user-visible
+   changes, and prepare release notes in `docs/releases/` describing
+   compatibility notes and known limitations.
 
 ## Tag and publish
 
@@ -33,7 +34,8 @@ git push origin v1.0
 
 The CI workflow runs on version tags matching `v*`. Confirm the tag workflow
 passes before announcing the release. Create or update the GitHub Release from
-the same tag and attach or link the corresponding release notes.
+the same tag, using the matching `CHANGELOG.md` entry and the release notes in
+`docs/releases/` as the release description.
 
 ## Post-release and rollback
 
