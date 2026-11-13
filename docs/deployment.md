@@ -19,8 +19,14 @@ read-only `/health/` endpoint.
    to complete. Render supplies the database URL and generated Django secret;
    do not copy secrets into the repository.
 6. Create an administrator using a secure one-time management procedure
-   supported by the selected Render plan. Do not put administrator credentials
-   in `render.yaml`, source control, or deployment logs.
+   supported by the selected Render plan. In the Render Shell, either run
+   `python manage.py createsuperuser` and answer the prompts, or set
+   `DJANGO_SUPERUSER_USERNAME`, `DJANGO_SUPERUSER_EMAIL`, and
+   `DJANGO_SUPERUSER_PASSWORD` for a single command and run
+   `python manage.py create_admin`. If the plan does not provide a shell, run
+   the same command locally with `DATABASE_URL` set to the database's external
+   connection string. Do not put administrator credentials in `render.yaml`,
+   source control, or deployment logs.
 7. Verify login, admin access, exam workflows, static assets, and the health
    endpoint against the live service.
 
