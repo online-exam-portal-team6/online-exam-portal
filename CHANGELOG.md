@@ -4,6 +4,20 @@ All notable changes to the Online Exam Portal are recorded here. The project
 follows [Semantic Versioning](https://semver.org/) and the format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.0.1] - 2026-11-13
+
+### Fixed
+
+- Restored the production administrator creation command by moving it from the
+  misspelled `accounts/managment/commands/` directory to
+  `accounts/management/commands/`. Django now discovers `create_admin`, so an
+  administrator account can be created on a deployed environment.
+- Documented the administrator creation procedure for Render deployments.
+
+### Changed
+
+- Added regression tests for the `create_admin` management command.
+
 ## [1.0.0] - 2026-11-13
 
 Initial release of the Online Exam Portal. Release notes are also available in
