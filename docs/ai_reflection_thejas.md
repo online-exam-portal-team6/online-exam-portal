@@ -49,8 +49,3 @@ brainstorming—not for taking over engineering decisions. I should verify
 claims against the source, preserve reviewable one-issue branches, and be
 prepared to explain every committed change.
 
-## Personal review before submission
-
-Add a concrete example of an AI suggestion you personally changed or rejected,
-and revise any wording above that does not reflect your own experience. Do not
-submit this draft unchanged unless you have verified that it is accurate.
