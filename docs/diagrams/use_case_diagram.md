@@ -54,4 +54,9 @@ The in-scope question type is four-option MCQ. One attempt per student/exam is e
 
 ## Export status
 
-This editable Mermaid source is committed for review and rendering. Jira asks for a PNG export as well; the connected GitHub file operation supports text assets, not binary PNG upload. The PNG export is therefore still outstanding and is not claimed as completed.
+Both the editable Mermaid source and the exported PNG diagram are included in the repository.
+
+- Mermaid source: `docs/diagrams/use_case_diagram.md`
+- PNG export: `docs/diagrams/use_case_diagram.png`
+
+Both artifacts are maintained together to support documentation review and diagram rendering.
